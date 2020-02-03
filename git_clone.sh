@@ -2,8 +2,8 @@
 
 # Clone the following directories from boostorg and checkout a selected tag.
 
-DIRS="algorithm align asio any assert atomic bind chrono concept_check config \
-container container_hash context conversion core date_time detail exception \
+DIRS="algorithm align asio any assert array atomic bind chrono concept_check config \
+container container_hash context conversion core crc date_time detail exception \
 filesystem foreach function functional function_types fusion heap \
 integer interprocess intrusive io iterator move mpl msm \
 multi_index optional parameter predef preprocessor range ratio regex \

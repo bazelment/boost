@@ -47,6 +47,10 @@ boost_library(
 )
 
 boost_library(
+    name = "array",
+)
+
+boost_library(
     name = "assert",
 )
 
@@ -108,6 +112,13 @@ boost_library(
     name = "core",
     deps = [
         ":config",
+    ],
+)
+
+boost_library(
+    name = "crc",
+    deps = [
+        ":core",
     ],
 )
 
