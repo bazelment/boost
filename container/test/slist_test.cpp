@@ -9,9 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <boost/container/detail/config_begin.hpp>
 #include <boost/container/slist.hpp>
-#include <boost/container/allocator.hpp>
 #include <boost/container/node_allocator.hpp>
-#include <boost/container/adaptive_pool.hpp>
 
 #include <memory>
 #include "dummy_test_allocator.hpp"
@@ -19,38 +17,9 @@
 #include "list_test.hpp"
 #include "propagate_allocator_test.hpp"
 #include "emplace_test.hpp"
+#include "../../intrusive/test/iterator_test.hpp"
 
 using namespace boost::container;
-
-namespace boost {
-namespace container {
-
-//Explicit instantiation to detect compilation errors
-template class boost::container::slist
-   < test::movable_and_copyable_int
-   , test::simple_allocator<test::movable_and_copyable_int> >;
-
-template class boost::container::slist
-   < test::movable_and_copyable_int
-   , test::dummy_test_allocator<test::movable_and_copyable_int> >;
-
-template class boost::container::slist
-   < test::movable_and_copyable_int
-   , std::allocator<test::movable_and_copyable_int> >;
-
-template class boost::container::slist
-   < test::movable_and_copyable_int
-   , allocator<test::movable_and_copyable_int> >;
-
-template class boost::container::slist
-   < test::movable_and_copyable_int
-   , adaptive_pool<test::movable_and_copyable_int> >;
-
-template class boost::container::slist
-   < test::movable_and_copyable_int
-   , node_allocator<test::movable_and_copyable_int> >;
-
-}}
 
 class recursive_slist
 {
@@ -81,28 +50,6 @@ struct GetAllocatorCont
                    > type;
    };
 };
-
-template<class VoidAllocator>
-int test_cont_variants()
-{
-   typedef typename GetAllocatorCont<VoidAllocator>::template apply<int>::type MyCont;
-   typedef typename GetAllocatorCont<VoidAllocator>::template apply<test::movable_int>::type MyMoveCont;
-   typedef typename GetAllocatorCont<VoidAllocator>::template apply<test::movable_and_copyable_int>::type MyCopyMoveCont;
-   typedef typename GetAllocatorCont<VoidAllocator>::template apply<test::copyable_int>::type MyCopyCont;
-
-   if(test::list_test<MyCont, false>())
-      return 1;
-   if(test::list_test<MyMoveCont, false>())
-      return 1;
-   if(test::list_test<MyCopyMoveCont, false>())
-      return 1;
-   if(test::list_test<MyCopyMoveCont, false>())
-      return 1;
-   if(test::list_test<MyCopyCont, false>())
-      return 1;
-
-   return 0;
-}
 
 bool test_support_for_initializer_list()
 {
@@ -152,6 +99,33 @@ bool test_support_for_initializer_list()
    return true;
 }
 
+bool test_for_splice()
+{
+   {
+      slist<int> list1; list1.push_front(3); list1.push_front(2); list1.push_front(1); list1.push_front(0);
+      slist<int> list2;
+      slist<int> expected1; expected1.push_front(3); expected1.push_front(2);  expected1.push_front(0);
+      slist<int> expected2; expected2.push_front(1);
+
+      list2.splice(list2.begin(), list1, ++list1.begin());
+
+      if (!(expected1 == list1 && expected2 == list2))
+         return false;
+   }
+   {
+      slist<int> list1; list1.push_front(3); list1.push_front(2); list1.push_front(1); list1.push_front(0);
+      slist<int> list2;
+      slist<int> expected1;
+      slist<int> expected2; expected2.push_front(3); expected2.push_front(2); expected2.push_front(1); expected2.push_front(0);
+
+      list2.splice(list2.begin(), list1, list1.begin(), list1.end());
+
+      if (!(expected1 == list1 && expected2 == list2))
+         return false;
+   }
+   return true;
+}
+
 struct boost_container_slist;
 
 namespace boost {
@@ -191,26 +165,18 @@ int main ()
    ////////////////////////////////////
    //    Testing allocator implementations
    ////////////////////////////////////
-   //       std:allocator
-   if(test_cont_variants< std::allocator<void> >()){
-      std::cerr << "test_cont_variants< std::allocator<void> > failed" << std::endl;
+   if (test::list_test<slist<int, std::allocator<int> >, false>())
       return 1;
-   }
-   //       boost::container::allocator
-   if(test_cont_variants< allocator<void> >()){
-      std::cerr << "test_cont_variants< allocator<void> > failed" << std::endl;
+   if (test::list_test<slist<int>, false>())
       return 1;
-   }
-   //       boost::container::node_allocator
-   if(test_cont_variants< node_allocator<void> >()){
-      std::cerr << "test_cont_variants< node_allocator<void> > failed" << std::endl;
+   if (test::list_test<slist<int, node_allocator<int> >, false>())
       return 1;
-   }
-   //       boost::container::adaptive_pool
-   if(test_cont_variants< adaptive_pool<void> >()){
-      std::cerr << "test_cont_variants< adaptive_pool<void> > failed" << std::endl;
+   if (test::list_test<slist<test::movable_int>, false>())
       return 1;
-   }
+   if (test::list_test<slist<test::movable_and_copyable_int>, false>())
+      return 1;
+   if (test::list_test<slist<test::copyable_int>, false>())
+      return 1;
 
    ////////////////////////////////////
    //    Emplace testing
@@ -228,8 +194,96 @@ int main ()
    if(!boost::container::test::test_propagate_allocator<boost_container_slist>())
       return 1;
 
+   ////////////////////////////////////
+   //    Initializer lists
+   ////////////////////////////////////
    if(!test_support_for_initializer_list())
       return 1;
+
+   ////////////////////////////////////
+   //    Splice testing
+   ////////////////////////////////////
+   if(!test_for_splice())
+      return 1;
+
+   ////////////////////////////////////
+   //    Iterator testing
+   ////////////////////////////////////
+   {
+      typedef boost::container::slist<int> vector_int;
+      vector_int a; a.push_front(2); a.push_front(1); a.push_front(0);
+      boost::intrusive::test::test_iterator_forward< boost::container::slist<int> >(a);
+      if(boost::report_errors() != 0) {
+         return 1;
+      }
+   }
+#ifndef BOOST_CONTAINER_NO_CXX17_CTAD
+   ////////////////////////////////////
+   //    Constructor Template Auto Deduction Tests
+   ////////////////////////////////////
+   {
+      auto gold = std::list{ 1, 2, 3 };
+      auto test = boost::container::slist(gold.begin(), gold.end());
+      if (test.size() != 3) {
+         return 1;
+      }
+      if (test.front() != 1)
+         return 1;
+      test.pop_front();
+      if (test.front() != 2)
+         return 1;
+      test.pop_front();
+      if (test.front() != 3)
+         return 1;
+      test.pop_front();
+   }
+   {
+      auto gold = std::list{ 1, 2, 3 };
+      auto test = boost::container::slist(gold.begin(), gold.end(), new_allocator<int>());
+      if (test.size() != 3) {
+         return 1;
+      }
+      if (test.front() != 1)
+         return 1;
+      test.pop_front();
+      if (test.front() != 2)
+         return 1;
+      test.pop_front();
+      if (test.front() != 3)
+         return 1;
+      test.pop_front();
+   }
+#endif
+
+   ////////////////////////////////////
+   //    has_trivial_destructor_after_move testing
+   ////////////////////////////////////
+   // default allocator
+   {
+      typedef boost::container::slist<int> cont;
+      typedef cont::allocator_type allocator_type;
+      typedef boost::container::allocator_traits<allocator_type>::pointer pointer;
+      if (boost::has_trivial_destructor_after_move<cont>::value !=
+          boost::has_trivial_destructor_after_move<allocator_type>::value &&
+          boost::has_trivial_destructor_after_move<pointer>::value) {
+         std::cerr << "has_trivial_destructor_after_move(default allocator) test failed" << std::endl;
+         return 1;
+      }
+   }
+   // std::allocator
+   {
+      typedef boost::container::slist<int, std::allocator<int> > cont;
+      typedef cont::allocator_type allocator_type;
+      typedef boost::container::allocator_traits<allocator_type>::pointer pointer;
+      if (boost::has_trivial_destructor_after_move<cont>::value !=
+          boost::has_trivial_destructor_after_move<allocator_type>::value &&
+          boost::has_trivial_destructor_after_move<pointer>::value) {
+         std::cerr << "has_trivial_destructor_after_move(std::allocator) test failed" << std::endl;
+         return 1;
+      }
+   }
+
+   return 0;
 }
 
 #include <boost/container/detail/config_end.hpp>

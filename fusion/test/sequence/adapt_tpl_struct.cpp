@@ -45,7 +45,7 @@ namespace ns
         (X)(Y),
         (ns::point)(X)(Y),
         x,
-        (BOOST_FUSION_ADAPT_AUTO, y)
+        (auto, y)
         (int, z)
     )
 
@@ -60,15 +60,28 @@ namespace ns
         (ns::point)(X)(Y),
         (X, x)
         (Y, y)
-        (BOOST_FUSION_ADAPT_AUTO, z)
+        (auto, z)
     )
 
     template<typename M>
     struct s { M m; };
-    BOOST_FUSION_ADAPT_TPL_STRUCT((M), (s)(M), (BOOST_FUSION_ADAPT_AUTO, m))
+    BOOST_FUSION_ADAPT_TPL_STRUCT((M), (s)(M), (auto, m))
 
 #endif
 
+template <typename TypeToConstruct>
+struct empty_struct_templated_factory {
+
+  TypeToConstruct operator()() {
+    return TypeToConstruct();
+  }
+
+};
+
+BOOST_FUSION_ADAPT_TPL_STRUCT(
+    (TypeToConstruct),
+    (empty_struct_templated_factory)(TypeToConstruct),
+) 
 
 int
 main()
@@ -83,6 +96,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<point>::value);
         point p = {123, 456, 789};
 
         std::cout << at_c<0>(p) << std::endl;
@@ -104,9 +118,9 @@ main()
     }
 
     {
-        vector<int, float, int> v1(4, 2, 2);
+        vector<int, float, int> v1(4, 2.f, 2);
         point v2 = {5, 3, 3};
-        vector<long, double, int> v3(5, 4, 4);
+        vector<long, double, int> v3(5, 4., 4);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);

@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/is_polymorphic.hpp>
 #endif
+#include "test.hpp"
+#include "check_integral_constant.hpp"
 
 #include <exception>
 #include <new>
@@ -81,6 +81,11 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_polymorphic<IDispatch>::value, true);
 //
 // this test was added to check for bug reported on 21 May 2003:
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_polymorphic<poly_bug>::value, true);
+
+#ifndef BOOST_NO_CXX11_FINAL
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_polymorphic < final_UDT >::value, false);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_polymorphic<polymorphic_derived_final>::value, true);
+#endif
 
 TT_TEST_END
 

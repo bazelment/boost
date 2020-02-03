@@ -28,6 +28,8 @@ following special characters:
 
 [pre .\[{}()\\\*+?|^$]
 
+Other characters are special only in certain situations - for example `]` is special only after an opening `[`.
+
 [h4 Wildcard]
 
 The single character '.' when used outside of a character set will match 
@@ -171,7 +173,7 @@ An escape character followed by a digit /n/, where /n/ is in the range 1-9,
 matches the same string that was matched by sub-expression /n/.  For example 
 the expression:
 
-[pre ^(a\*).\*\\1$]
+[pre ^(a\*)\[\^a\]\*\\1$]
 
 Will match the string:
 
@@ -297,24 +299,24 @@ The following escape sequences are all synonyms for single characters:
 
 [table
 [[Escape][Character]]
-[[[^\a]][[^\a]]]
-[[[^\e]][[^0x1B]]]
-[[[^\f]][[^\f]]]
-[[[^\n]][[^\n]]]
-[[[^\r]][[^\r]]]
-[[[^\t]][[^\t]]]
-[[[^\v]][[^\v]]]
-[[[^\b]][[^\b] (but only inside a character class declaration).]]
-[[[^\cX]][An ASCII escape sequence - the character whose code point is X % 32]]
-[[[^\xdd]][A hexadecimal escape sequence - matches the single character whose 
+[[[^\\a]][[^\\a]]]
+[[[^\\e]][[^0x1B]]]
+[[[^\\f]][[^\\f]]]
+[[[^\\n]][[^\\n]]]
+[[[^\\r]][[^\\r]]]
+[[[^\\t]][[^\\t]]]
+[[[^\\v]][[^\\v]]]
+[[[^\\b]][[^\\b] (but only inside a character class declaration).]]
+[[[^\\cX]][An ASCII escape sequence - the character whose code point is X % 32]]
+[[[^\\xdd]][A hexadecimal escape sequence - matches the single character whose 
       code point is 0xdd.]]
-[[[^\x{dddd}]][A hexadecimal escape sequence - matches the single character whose 
+[[[^\\x{dddd}]][A hexadecimal escape sequence - matches the single character whose 
       code point is 0xdddd.]]
-[[[^\0ddd]][An octal escape sequence - matches the single character whose 
+[[[^\\0ddd]][An octal escape sequence - matches the single character whose 
    code point is 0ddd.]]
-[[[^\N{name}]][Matches the single character which has the 
+[[[^\\N{name}]][Matches the single character which has the 
       [link boost_regex.syntax.collating_names symbolic name] /name/.  
-      For example [^\N{newline}] matches the single character \\n.]]
+      For example [^\\N{newline}] matches the single character \\n.]]
 ]      
  
 [h5 "Single character" character classes:]
@@ -564,12 +566,29 @@ executes /no-pattern/.
 * [^(?(DEFINE)never-exectuted-pattern)]  Defines a block of code that is never executed and matches no characters:
 this is usually used to define one or more named sub-expressions which are referred to from elsewhere in the pattern.
 
+[h5 Backtracking Control Verbs]
+
+This library has partial support for Perl's backtracking control verbs, in particular (*MARK) is not supported.
+There may also be detail differences in behaviour between this library and Perl, not least because Perl's behaviour
+is rather under-documented and often somewhat random in how it behaves in practice.  The verbs supported are:
+
+* [^(*PRUNE)]  Has no effect unless backtracked onto, in which case all the backtracking information prior to this
+point is discarded.
+* [^(*SKIP)]   Behaves the same as [^(*PRUNE)] except that it is assumed that no match can possibly occur prior to 
+the current point in the string being searched.  This can be used to optimize searches by skipping over chunks of text
+that have already been determined can not form a match.
+* [^(*THEN)]  Has no effect unless backtracked onto, in which case all subsequent alternatives in a group of alternations
+are discarded.
+* [^(*COMMIT)]  Has no effect unless backtracked onto, in which case all subsequent matching/searching attempts are abandoned.
+* [^(*FAIL)]  Causes the match to fail unconditionally at this point, can be used to force the engine to backtrack.
+* [^(*ACCEPT)] Causes the pattern to be considered matched at the current point.  Any half-open sub-expressions are closed at the current point.
+
 [h4 Operator precedence]
 
 The order of precedence for of operators is as follows:
 
 # Collation-related bracket symbols 	`[==] [::] [..]`
-# Escaped characters 	[^\]
+# Escaped characters 	[^\\]
 # Character set (bracket expression) 	`[]`
 # Grouping 	[^()]
 # Single-character-ERE duplication 	[^* + ? {m,n}]

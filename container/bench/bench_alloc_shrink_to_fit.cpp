@@ -22,6 +22,7 @@
 
 #include <memory>    //std::allocator
 #include <iostream>  //std::cout, std::endl
+#include <cassert>   //assert
 
 #include <boost/timer/timer.hpp>
 using boost::timer::cpu_timer;
@@ -83,8 +84,8 @@ void vector_test_template(unsigned int num_iterations, unsigned int num_elements
    timer.resume();
 
    #ifndef NDEBUG
-   typedef bc::container_detail::integral_constant
-      <unsigned, bc::container_detail::version<Allocator>::value> alloc_version;
+   typedef bc::dtl::integral_constant
+      <unsigned, bc::dtl::version<Allocator>::value> alloc_version;
    #endif
 
    for(unsigned int r = 0; r != num_iterations; ++r){
@@ -126,26 +127,30 @@ void vector_test_template(unsigned int num_iterations, unsigned int num_elements
                   << float(nseconds)/(num_iterations*num_elements)
                   << std::endl << std::endl;
    }
-   boost_cont_trim(0);
+   bc::dlmalloc_trim(0);
 }
 
 int main(int argc, const char *argv[])
 {
-   #define SINGLE_TEST
-   #ifndef SINGLE_TEST
+   //#define SINGLE_TEST
+   #define SIMPLE_IT
+   #ifdef SINGLE_TEST
+      #ifdef NDEBUG
+      unsigned int numit [] =  { 10 };
+      #else
+      unsigned int numit [] =  { 50 };
+      unsigned int numele[] = { 2000 };
+      #endif
+   #elif defined SIMPLE_IT
+      unsigned int numit [] =  { 3 };
+      unsigned int numele[] = { 2000 };
+   #else
       #ifdef NDEBUG
       unsigned int numit [] =  { 100,   1000, 10000 };
       #else
       unsigned int numit [] =  { 10,   100, 1000 };
       #endif
       unsigned int numele [] = { 10000, 2000, 500   };
-   #else
-      #ifdef NDEBUG
-      unsigned int numit [] =  { 500 };
-      #else
-      unsigned int numit [] =  { 50 };
-      #endif
-      unsigned int numele [] = { 2000   };
    #endif
 
    bool csv_output = argc == 2 && (strcmp(argv[1], "--csv-output") == 0);

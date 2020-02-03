@@ -1,3 +1,15 @@
+[/
+    Boost.Config
+
+    Copyright (c) 2001 Beman Dawes
+    Copyright (c) 2001 Vesa Karvonen
+    Copyright (c) 2001 John Maddock
+
+    Distributed under the Boost Software License, Version 1.0.
+    (See accompanying file LICENSE_1_0.txt or copy at
+    http://www.boost.org/LICENSE_1_0.txt)
+]
+
 [section:cstdint Standard Integer Types]
 
 [section Overview]
@@ -135,5 +147,12 @@ For example:
    static const boost::uint64_t c = INT64_C(0x1FFFFFFFF);
 
 [endsect]
+
+[section:intptr Integers for Storing Pointers]
+
+The typedefs [^intptr_t] and [^uintptr_t] defined signed and unsigned integers respectively each capable of storing a pointer.  The macro [^BOOST_HAS_INTPTR_T] is set when these types are available.
+
+[endsect]
+
 
 [endsect]

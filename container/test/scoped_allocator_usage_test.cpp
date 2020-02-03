@@ -31,7 +31,7 @@ class SimpleAllocator
 public:
    typedef Ty value_type;
 
-   SimpleAllocator(int value)
+   explicit SimpleAllocator(int value)
       : m_state(value)
    {}
 
@@ -341,7 +341,7 @@ bool test_value_and_state_equals(const alloc_int &r, int value, int state)
 {  return r.get_value() == value && r.get_allocator_state() == state;  }
 
 template<class F, class S>
-bool test_value_and_state_equals(const container_detail::pair<F, S> &p, int value, int state)
+bool test_value_and_state_equals(const dtl::pair<F, S> &p, int value, int state)
 {  return test_value_and_state_equals(p.first, value, state) && test_alloc_state_equals(p.second, value, state);  }
 
 template<class F, class S>
@@ -356,7 +356,8 @@ bool one_level_allocator_propagation_test()
    typedef typename ContainerWrapper::allocator_type allocator_type;
    typedef typename ContainerWrapper::value_type value_type;
    {
-      ContainerWrapper c(allocator_type(SimpleAllocator<value_type>(5)));
+      allocator_type al(SimpleAllocator<value_type>(5));
+      ContainerWrapper c(al);
 
       c.clear();
       iterator it = c.emplace(c.cbegin(), 42);
@@ -365,7 +366,8 @@ bool one_level_allocator_propagation_test()
          return false;
    }
    {
-      ContainerWrapper c2(allocator_type(SimpleAllocator<value_type>(4)));
+      allocator_type al(SimpleAllocator<value_type>(4));
+      ContainerWrapper c2(al);
       ContainerWrapper c(::boost::move(c2), allocator_type(SimpleAllocator<value_type>(5)));
 
       c.clear();
@@ -388,7 +390,7 @@ bool one_level_allocator_propagation_test()
 }
 
 int main()
-{/*
+{
    //unique assoc
    if(!one_level_allocator_propagation_test<FlatMap>())
       return 1;
@@ -406,7 +408,7 @@ int main()
    if(!one_level_allocator_propagation_test<FlatMultiSet>())
       return 1;
    if(!one_level_allocator_propagation_test<MultiSet>())
-      return 1;*/
+      return 1;
    //sequence containers
    if(!one_level_allocator_propagation_test<Vector>())
       return 1;

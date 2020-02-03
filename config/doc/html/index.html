@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Boost.Config</title>
 <link rel="stylesheet" href="../../../../doc/src/boostbook.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Boost.Config">
 <link rel="next" href="boost_config/boost_macro_reference.html" title="Boost Macro Reference">
 </head>
@@ -72,6 +72,12 @@
       that describe C++14 features not supported</a></span></dt>
 <dt><span class="section"><a href="boost_config/boost_macro_reference.html#boost_config.boost_macro_reference.macros_that_allow_use_of_c__14_features_with_c__11_or_earlier_compilers">Macros
       that allow use of C++14 features with C++11 or earlier compilers</a></span></dt>
+<dt><span class="section"><a href="boost_config/boost_macro_reference.html#boost_config.boost_macro_reference.macros_that_describe_c__17_features_not_supported">Macros
+      that describe C++17 features not supported</a></span></dt>
+<dt><span class="section"><a href="boost_config/boost_macro_reference.html#boost_config.boost_macro_reference.macros_that_allow_use_of_c__17_features_with_c__14_or_earlier_compilers">Macros
+      that allow use of C++17 features with C++14 or earlier compilers</a></span></dt>
+<dt><span class="section"><a href="boost_config/boost_macro_reference.html#boost_config.boost_macro_reference.macros_that_describe_features_that_have_been_removed_from_the_standard_">Macros
+      that describe features that have been removed from the standard.</a></span></dt>
 <dt><span class="section"><a href="boost_config/boost_macro_reference.html#boost_config.boost_macro_reference.boost_helper_macros">Boost
       Helper Macros</a></span></dt>
 <dt><span class="section"><a href="boost_config/boost_macro_reference.html#boost_config.boost_macro_reference.boost_informational_macros">Boost
@@ -97,6 +103,7 @@
       integer types</a></span></dt>
 <dt><span class="section"><a href="boost_config/cstdint.html#boost_config.cstdint.integer_constant_macros">Integer
       Constant Macros</a></span></dt>
+<dt><span class="section"><a href="boost_config/cstdint.html#boost_config.cstdint.intptr">Integers for Storing Pointers</a></span></dt>
 </dl></dd>
 <dt><span class="section"><a href="boost_config/guidelines_for_boost_authors.html">Guidelines for
     Boost Authors</a></span></dt>
@@ -157,7 +164,7 @@
       </p>
 <p>
         Boost library users can request support for additional compilers or platforms
-        by visiting our <a href="https://svn.boost.org/trac/boost/newticket" target="_top">Trac</a>
+        by visiting our <a href="https://github.com/boostorg/config/issues" target="_top">Github</a>
         and submitting a support request.
       </p>
 </div>
@@ -753,7 +760,7 @@
         user settable macros</a>).
       </p>
 <p>
-        Finally the boost configuration header, includes <a href="../../../../boost/config/user.hpp" target="_top">&lt;boost/config/suffix.hpp&gt;</a>;
+        Finally the boost configuration header, includes <a href="../../../../boost/config/detail/suffix.hpp" target="_top">&lt;boost/config/detail/suffix.hpp&gt;</a>;
         this header contains any boiler plate configuration code - for example where
         one boost macro being set implies that another must be set also.
       </p>
@@ -965,11 +972,6 @@
         to help you out:
       </p>
 <p>
-        If you have built the <a href="../../../../tools/regression/doc/index.html" target="_top">boost
-        regression test driver</a>, then you can use this to produce a nice html
-        formatted report of the results using the supplied test file.
-      </p>
-<p>
         Alternatively you can run the configure script like this:
       </p>
 <div class="blockquote"><blockquote class="blockquote"><p>
@@ -988,7 +990,7 @@
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: October 21, 2014 at 11:37:59 GMT</small></p></td>
+<td align="left"><p><small>Last revised: October 29, 2019 at 16:54:06 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 <hr>

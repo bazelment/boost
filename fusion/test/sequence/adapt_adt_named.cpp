@@ -72,10 +72,14 @@ BOOST_FUSION_ADAPT_ADT_NAMED(
     ns::point, point,
     (int, int, obj.get_x(), obj.set_x(val))
     (int, int, obj.get_y(), obj.set_y(val))
-    (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_z(), obj.set_z(val))
+    (auto, auto, obj.get_z(), obj.set_z(val))
 )
 
 #endif // BOOST_PP_VARIADICS
+
+
+class empty_adt{};
+BOOST_FUSION_ADAPT_ADT_NAMED(empty_adt,renamed_empty_adt,)
 
 int
 main()
@@ -89,6 +93,7 @@ main()
 
     {
         BOOST_MPL_ASSERT((traits::is_view<adapted::point>));
+        BOOST_STATIC_ASSERT(traits::is_view<adapted::point>::value);
         ns::point basep(123, 456, 789);
         adapted::point p(basep);
 
@@ -111,11 +116,11 @@ main()
     }
 
     {
-        fusion::vector<int, float, int> v1(4, 2, 2);
+        fusion::vector<int, float, int> v1(4, 2.f, 2);
         ns::point basep(5, 3, 3);
         adapted::point v2(basep);
 
-        fusion::vector<long, double, int> v3(5, 4, 4);
+        fusion::vector<long, double, int> v3(5, 4., 4);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);

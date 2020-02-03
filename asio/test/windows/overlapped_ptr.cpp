@@ -2,7 +2,7 @@
 // overlapped_ptr.cpp
 // ~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2015 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -16,7 +16,8 @@
 // Test that header file is self-contained.
 #include <boost/asio/windows/overlapped_ptr.hpp>
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/executor.hpp>
+#include <boost/asio/io_context.hpp>
 #include "../unit_test.hpp"
 
 //------------------------------------------------------------------------------
@@ -48,26 +49,37 @@ void test()
 
   try
   {
-    io_service ios;
+    io_context ioc;
+    boost::asio::executor ex(ioc.get_executor());
 
     // basic_overlapped_ptr constructors.
 
     win::overlapped_ptr ptr1;
 
-    win::overlapped_ptr ptr2(ios, &overlapped_handler_1);
-    win::overlapped_ptr ptr3(ios, overlapped_handler_2());
+    win::overlapped_ptr ptr2(ioc, &overlapped_handler_1);
+    win::overlapped_ptr ptr3(ioc, overlapped_handler_2());
+
+    win::overlapped_ptr ptr4(ioc.get_executor(), &overlapped_handler_1);
+    win::overlapped_ptr ptr5(ioc.get_executor(), overlapped_handler_2());
+    win::overlapped_ptr ptr6(ex, &overlapped_handler_1);
+    win::overlapped_ptr ptr7(ex, overlapped_handler_2());
 
     // overlapped_ptr functions.
 
     ptr1.reset();
 
-    ptr2.reset(ios, &overlapped_handler_1);
-    ptr3.reset(ios, overlapped_handler_2());
+    ptr2.reset(ioc, &overlapped_handler_1);
+    ptr3.reset(ioc, overlapped_handler_2());
+
+    ptr2.reset(ioc.get_executor(), &overlapped_handler_1);
+    ptr3.reset(ioc.get_executor(), overlapped_handler_2());
+    ptr2.reset(ex, &overlapped_handler_1);
+    ptr3.reset(ex, overlapped_handler_2());
 
     OVERLAPPED* ov1 = ptr1.get();
     (void)ov1;
 
-    const win::overlapped_ptr& ptr4(ptr1);
+    const win::overlapped_ptr& ptr8(ptr1);
     const OVERLAPPED* ov2 = ptr4.get();
     (void)ov2;
 

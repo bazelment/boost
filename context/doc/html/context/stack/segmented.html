@@ -24,12 +24,13 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="context.stack.segmented"></a><a class="link" href="segmented.html" title="Class segmented_stack">Class <span class="emphasis"><em>segmented_stack</em></span></a>
+<a name="context.stack.segmented"></a><a name="segmented"></a><a class="link" href="segmented.html" title="Class segmented_stack">Class
+      <span class="emphasis"><em>segmented_stack</em></span></a>
 </h3></div></div></div>
 <p>
-        <span class="bold"><strong>Boost.Context</strong></span> supports usage of a <span class="emphasis"><em>segmented_stack</em></span>,
-        e. g. the size of the stack grows on demand. The coroutine is created with
-        a minimal stack size and will be increased as required. Class <span class="emphasis"><em>segmented_stack</em></span>
+        <span class="bold"><strong>Boost.Context</strong></span> supports usage of a <a class="link" href="segmented.html#segmented"><span class="emphasis"><em>segmented_stack</em></span></a>, e. g. the
+        size of the stack grows on demand. The coroutine is created with a minimal
+        stack size and will be increased as required. Class <a class="link" href="segmented.html#segmented"><span class="emphasis"><em>segmented_stack</em></span></a>
         models the <span class="emphasis"><em>stack-allocator concept</em></span>. In contrast to
         <span class="emphasis"><em>protected_fixedsize_stack</em></span> and <span class="emphasis"><em>fixedsize_stack</em></span>
         it creates a stack which grows on demand.
@@ -43,17 +44,30 @@
           Segmented stacks are currently only supported by <span class="bold"><strong>gcc</strong></span>
           from version <span class="bold"><strong>4.7</strong></span> <span class="bold"><strong>clang</strong></span>
           from version <span class="bold"><strong>3.4</strong></span> onwards. In order to
-          use a __segmented_stack__ <span class="bold"><strong>Boost.Context</strong></span>
-          must be built with <span class="bold"><strong>toolset=gcc segmented-stacks=on</strong></span>
-          at b2/bjam command-line. Applications must be compiled with compiler-flags
-          <span class="bold"><strong>-fsplit-stack -DBOOST_USE_SEGMENTED_STACKS</strong></span>.
+          use a <span class="emphasis"><em>segmented_stack</em></span> <span class="bold"><strong>Boost.Context</strong></span>
+          must be built with property <code class="computeroutput"><span class="identifier">segmented</span><span class="special">-</span><span class="identifier">stacks</span></code>,
+          e.g. <span class="bold"><strong>toolset=gcc segmented-stacks=on</strong></span> and
+          applying <code class="computeroutput"><span class="identifier">BOOST_USE_SEGMENTED_STACKS</span></code>
+          at b2/bjam command line.
         </p></td></tr>
 </table></div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          Segmented stacks can only be used with <a class="link" href="../cc.html#cc"><span class="emphasis"><em>callcc()</em></span></a>
+          (using <a class="link" href="../ff/implementations__fcontext_t__ucontext_t_and_winfiber.html#implementation"><span class="emphasis"><em>ucontext_t</em></span></a>)
+        </p></td></tr>
+</table></div>
+<p>
+        .
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">context</span><span class="special">/</span><span class="identifier">segmented_stack</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 
 <span class="keyword">template</span><span class="special">&lt;</span> <span class="keyword">typename</span> <span class="identifier">traitsT</span> <span class="special">&gt;</span>
-<span class="keyword">struct</span> <span class="identifier">basic_segmented_stack</span>
-<span class="special">{</span>
+<span class="keyword">struct</span> <span class="identifier">basic_segmented_stack</span> <span class="special">{</span>
     <span class="keyword">typedef</span> <span class="identifier">traitT</span>  <span class="identifier">traits_type</span><span class="special">;</span>
 
     <span class="identifier">basic_segmented_stack</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">size</span> <span class="special">=</span> <span class="identifier">traits_type</span><span class="special">::</span><span class="identifier">default_size</span><span class="special">());</span>
@@ -110,6 +124,16 @@
             </p></dd>
 </dl>
 </div>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          If the library is compiled for segmented stacks, <span class="emphasis"><em>segmented_stack</em></span>
+          is the only available stack allocator.
+        </p></td></tr>
+</table></div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>

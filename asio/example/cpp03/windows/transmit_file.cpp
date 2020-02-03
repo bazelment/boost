@@ -2,7 +2,7 @@
 // transmit_file.cpp
 // ~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2015 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -22,13 +22,19 @@ using boost::asio::ip::tcp;
 using boost::asio::windows::overlapped_ptr;
 using boost::asio::windows::random_access_handle;
 
+typedef boost::asio::basic_stream_socket<tcp,
+    boost::asio::io_context::executor_type> tcp_socket;
+
+typedef boost::asio::basic_socket_acceptor<tcp,
+    boost::asio::io_context::executor_type> tcp_acceptor;
+
 // A wrapper for the TransmitFile overlapped I/O operation.
 template <typename Handler>
-void transmit_file(tcp::socket& socket,
+void transmit_file(tcp_socket& socket,
     random_access_handle& file, Handler handler)
 {
   // Construct an OVERLAPPED-derived object to contain the handler.
-  overlapped_ptr overlapped(socket.get_io_service(), handler);
+  overlapped_ptr overlapped(socket.get_executor().context(), handler);
 
   // Initiate the TransmitFile operation.
   BOOL ok = ::TransmitFile(socket.native_handle(),
@@ -40,7 +46,7 @@ void transmit_file(tcp::socket& socket,
   {
     // The operation completed immediately, so a completion notification needs
     // to be posted. When complete() is called, ownership of the OVERLAPPED-
-    // derived object passes to the io_service.
+    // derived object passes to the io_context.
     boost::system::error_code ec(last_error,
         boost::asio::error::get_system_category());
     overlapped.complete(ec, 0);
@@ -48,7 +54,7 @@ void transmit_file(tcp::socket& socket,
   else
   {
     // The operation was successfully initiated, so ownership of the
-    // OVERLAPPED-derived object has passed to the io_service.
+    // OVERLAPPED-derived object has passed to the io_context.
     overlapped.release();
   }
 }
@@ -59,13 +65,13 @@ class connection
 public:
   typedef boost::shared_ptr<connection> pointer;
 
-  static pointer create(boost::asio::io_service& io_service,
+  static pointer create(boost::asio::io_context& io_context,
       const std::string& filename)
   {
-    return pointer(new connection(io_service, filename));
+    return pointer(new connection(io_context, filename));
   }
 
-  tcp::socket& socket()
+  tcp_socket& socket()
   {
     return socket_;
   }
@@ -85,10 +91,10 @@ public:
   }
 
 private:
-  connection(boost::asio::io_service& io_service, const std::string& filename)
-    : socket_(io_service),
+  connection(boost::asio::io_context& io_context, const std::string& filename)
+    : socket_(io_context),
       filename_(filename),
-      file_(io_service)
+      file_(io_context)
   {
   }
 
@@ -96,10 +102,10 @@ private:
       size_t /*bytes_transferred*/)
   {
     boost::system::error_code ignored_ec;
-    socket_.shutdown(tcp::socket::shutdown_both, ignored_ec);
+    socket_.shutdown(tcp_socket::shutdown_both, ignored_ec);
   }
 
-  tcp::socket socket_;
+  tcp_socket socket_;
   std::string filename_;
   random_access_handle file_;
 };
@@ -107,9 +113,9 @@ private:
 class server
 {
 public:
-  server(boost::asio::io_service& io_service,
+  server(boost::asio::io_context& io_context,
       unsigned short port, const std::string& filename)
-    : acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
+    : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)),
       filename_(filename)
   {
     start_accept();
@@ -119,7 +125,7 @@ private:
   void start_accept()
   {
     connection::pointer new_connection =
-      connection::create(acceptor_.get_io_service(), filename_);
+      connection::create(acceptor_.get_executor().context(), filename_);
 
     acceptor_.async_accept(new_connection->socket(),
         boost::bind(&server::handle_accept, this, new_connection,
@@ -137,7 +143,7 @@ private:
     start_accept();
   }
 
-  tcp::acceptor acceptor_;
+  tcp_acceptor acceptor_;
   std::string filename_;
 };
 
@@ -151,12 +157,12 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_context;
 
     using namespace std; // For atoi.
-    server s(io_service, atoi(argv[1]), argv[2]);
+    server s(io_context, atoi(argv[1]), argv[2]);
 
-    io_service.run();
+    io_context.run();
   }
   catch (std::exception& e)
   {

@@ -4,13 +4,30 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/has_trivial_destructor.hpp>
 #endif
+#include "test.hpp"
+#include "check_integral_constant.hpp"
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+
+struct deleted_destruct
+{
+   deleted_destruct();
+   ~deleted_destruct() = delete;
+};
+
+#endif
+
+struct private_destruct
+{
+   private_destruct();
+private:
+   ~private_destruct();
+};
 
 TT_TEST_BEGIN(has_trivial_destructor)
 
@@ -169,6 +186,11 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_destructor<wrap<trivial_except_d
 BOOST_CHECK_SOFT_INTEGRAL_CONSTANT(::tt::has_trivial_destructor<wrap<trivial_except_copy> >::value, true, false);
 BOOST_CHECK_SOFT_INTEGRAL_CONSTANT(::tt::has_trivial_destructor<wrap<trivial_except_construct> >::value, true, false);
 BOOST_CHECK_SOFT_INTEGRAL_CONSTANT(::tt::has_trivial_destructor<wrap<trivial_except_assign> >::value, true, false);
+
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_destructor<private_destruct>::value, false);
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_destructor<deleted_destruct>::value, false);
+#endif
 
 TT_TEST_END
 

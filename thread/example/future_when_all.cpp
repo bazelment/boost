@@ -21,6 +21,10 @@
 #include <string>
 #if defined BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY
 
+#ifdef BOOST_MSVC
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
+
 int p1()
 {
   BOOST_THREAD_LOG
@@ -58,6 +62,8 @@ int p2(boost::future<int> f)
   }
   BOOST_THREAD_LOG
     << "P2>" << BOOST_THREAD_END_LOG;
+  return 0;
+
 }
 int p2s(boost::shared_future<int> f)
 {
@@ -81,6 +87,7 @@ int p2s(boost::shared_future<int> f)
   }
   BOOST_THREAD_LOG
     << "P2>" << BOOST_THREAD_END_LOG;
+  return 0;
 }
 
 int main()

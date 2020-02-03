@@ -31,7 +31,6 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <boost/thread/locks.hpp>
@@ -59,10 +58,10 @@ public:
 
     concurrent_runner(
         const boost::function<bool(size_t)> & fn)
-        : finished_(false), failure_(false),
-        first_thread_(boost::bind(&concurrent_runner::thread_function, this, fn, 0)),
-        second_thread_(boost::bind(&concurrent_runner::thread_function, this, fn, 1))
+        : finished_(false), failure_(false)
     {
+        boost::thread(boost::bind(&concurrent_runner::thread_function, this, fn, 0)).swap(first_thread_);
+        boost::thread(boost::bind(&concurrent_runner::thread_function, this, fn, 1)).swap(second_thread_);
     }
 
     void

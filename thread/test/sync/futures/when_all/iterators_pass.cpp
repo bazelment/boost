@@ -31,6 +31,10 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <stdexcept>
 
+#ifdef BOOST_MSVC
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
+
 int p1()
 {
   return 123;
@@ -281,7 +285,7 @@ int main()
     BOOST_TEST(res[1].is_ready());
     BOOST_TEST(res[1].get() == 321);
   }
-#if ! defined BOOST_NO_CXX11_DECLTYPE_N3276
+#if defined BOOST_THREAD_PROVIDES_VARIADIC_THREAD
   // fixme darwin-4.8.0_11 terminate called without an active exception
   { // deferred future copy-constructible
     boost::future<int> f1 = boost::async(boost::launch::deferred, &p1);

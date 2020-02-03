@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.tt.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_type.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/add_reference.hpp>
 #endif
+#include "test.hpp"
+#include "check_type.hpp"
 
 BOOST_DECL_TRANSFORM_TEST(add_reference_test_1, ::tt::add_reference, const, const&)
 BOOST_DECL_TRANSFORM_TEST(add_reference_test_2, ::tt::add_reference, volatile, volatile&)
@@ -51,6 +51,11 @@ TT_TEST_BEGIN(add_reference)
    add_reference_test_6a();
    add_reference_test_13a();
 #endif
+
+   BOOST_CHECK_TYPE(tt::add_reference<void>::type, void);
+   BOOST_CHECK_TYPE(tt::add_reference<const void>::type, const void);
+   BOOST_CHECK_TYPE(tt::add_reference<const volatile void>::type, const volatile void);
+   BOOST_CHECK_TYPE(tt::add_reference<volatile void>::type, volatile void);
 
 TT_TEST_END
 

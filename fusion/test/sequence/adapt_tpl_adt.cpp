@@ -75,9 +75,23 @@ namespace ns
       (ns::point)(X)(Y),
       (X, X, obj.get_x(), obj.set_x(val))
       (Y, Y, obj.get_y(), obj.set_y(val))
-      (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_z(), obj.set_z(val))
+      (auto, auto, obj.get_z(), obj.set_z(val))
   )
 #endif
+
+template <typename TypeToConstruct>
+class empty_adt_templated_factory {
+
+  TypeToConstruct operator()() {
+    return TypeToConstruct();
+  }
+
+};
+
+BOOST_FUSION_ADAPT_TPL_ADT(
+    (TypeToConstruct),
+    (empty_adt_templated_factory)(TypeToConstruct),
+) 
 
 int
 main()
@@ -93,6 +107,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<point>::value);
         point p(123, 456, 789);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -114,9 +129,9 @@ main()
     }
 
     {
-        boost::fusion::vector<int, float, int> v1(4, 2, 2);
+        boost::fusion::vector<int, float, int> v1(4, 2.f, 2);
         point v2(5, 3, 3);
-        boost::fusion::vector<long, double, int> v3(5, 4, 4);
+        boost::fusion::vector<long, double, int> v3(5, 4., 4);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);

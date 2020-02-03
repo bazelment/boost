@@ -20,8 +20,11 @@
 #include <iostream>
 
 #if    defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION \
-  && ! defined BOOST_NO_CXX11_LAMBDAS && ! (defined BOOST_MSVC && _MSC_VER < 1700)
+  && ! defined BOOST_NO_CXX11_LAMBDAS && ! (defined BOOST_MSVC && _MSC_VER < 1800) // works since msvc-12.0
 
+#ifdef BOOST_MSVC
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
 
 int main()
 {
@@ -42,6 +45,14 @@ int main()
       int result = f2.get();
       BOOST_THREAD_LOG << "f2 " << result << BOOST_THREAD_END_LOG;
     }
+#if ! defined    BOOST_NO_CXX14_GENERIC_LAMBDAS
+    {
+      boost::future<int> f1 = boost::async(boost::launch::async, []() {return 123;});
+      boost::future<int> f2 = f1.then([](auto f)  {return 2*f.get(); });
+      int result = f2.get();
+      BOOST_THREAD_LOG << "f2 " << result << BOOST_THREAD_END_LOG;
+    }
+#endif
   }
   catch (std::exception& ex)
   {
@@ -59,6 +70,8 @@ int main()
   return 0;
 }
 #else
+
+//#warning "This test is not supported in this configuration, either because  Bosst.Thread has been configured to don't support continuations, the compiler doesn't provides lambdas or because they are buggy as for MSV versions < msvc-12.0"
 
 int main()
 {

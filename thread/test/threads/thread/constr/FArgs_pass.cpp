@@ -29,11 +29,13 @@ unsigned throw_one = 0xFFFF;
 void* operator new(std::size_t s) _GLIBCXX_THROW (std::bad_alloc)
 #elif defined BOOST_MSVC
 void* operator new(std::size_t s)
+#elif __cplusplus > 201402L
+void* operator new(std::size_t s)
 #else
 void* operator new(std::size_t s) throw (std::bad_alloc)
 #endif
 {
-  std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  //std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   if (throw_one == 0) throw std::bad_alloc();
   --throw_one;
   return std::malloc(s);
@@ -42,10 +44,10 @@ void* operator new(std::size_t s) throw (std::bad_alloc)
 #if defined BOOST_MSVC
 void operator delete(void* p)
 #else
-void operator delete(void* p) throw ()
+void operator delete(void* p) BOOST_NOEXCEPT_OR_NOTHROW
 #endif
 {
-  std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  //std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   std::free(p);
 }
 

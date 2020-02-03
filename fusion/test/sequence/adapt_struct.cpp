@@ -32,13 +32,17 @@
 #include <iostream>
 #include <string>
 
+namespace namespaced_type {
+  typedef int integer;
+}
+
 namespace ns
 {
     struct point
     {
         int x;
         int y;
-        int z;
+        namespaced_type::integer z;
     };
 
 #if !BOOST_WORKAROUND(__GNUC__,<4)
@@ -67,6 +71,17 @@ namespace ns
         foo foo_;
         int y;
     };
+
+
+    // Testing non-constexpr compatible types
+    struct employee {
+      std::string name;
+      std::string nickname;
+
+      employee(std::string name, std::string nickname)
+        : name(name), nickname(nickname) 
+      {}
+    };
 }
 
 #if BOOST_PP_VARIADICS
@@ -93,16 +108,23 @@ namespace ns
     BOOST_FUSION_ADAPT_STRUCT(
         ns::bar,
         foo_.x, // test that adapted members can actually be expressions
-        y
+        (auto , y)
     )
+
+    BOOST_FUSION_ADAPT_STRUCT(
+        ns::employee,
+        name,
+        nickname
+    )
+        
 
 #else // BOOST_PP_VARIADICS
 
     BOOST_FUSION_ADAPT_STRUCT(
         ns::point,
         (int, x)
-        (int, y)
-        (BOOST_FUSION_ADAPT_AUTO, z)
+        (auto, y)
+        (namespaced_type::integer, z)
     )
 
 #   if !BOOST_WORKAROUND(__GNUC__,<4)
@@ -110,20 +132,30 @@ namespace ns
         ns::point_with_private_attributes,
         (int, x)
         (int, y)
-        (BOOST_FUSION_ADAPT_AUTO, z)
+        (auto, z)
     )
 #   endif
 
     struct s { int m; };
-    BOOST_FUSION_ADAPT_STRUCT(s, (BOOST_FUSION_ADAPT_AUTO, m))
+    BOOST_FUSION_ADAPT_STRUCT(s, (auto, m))
 
     BOOST_FUSION_ADAPT_STRUCT(
         ns::bar,
-        (BOOST_FUSION_ADAPT_AUTO, foo_.x) // test that adapted members can actually be expressions
-        (BOOST_FUSION_ADAPT_AUTO, y)
+        (auto, foo_.x) // test that adapted members can actually be expressions
+        (BOOST_FUSION_ADAPT_AUTO, y) // Mixing auto & BOOST_FUSION_ADAPT_AUTO 
+                                     // to test backward compatibility
+    )
+
+    BOOST_FUSION_ADAPT_STRUCT(
+        ns::employee,
+        (std::string, name)
+        (BOOST_FUSION_ADAPT_AUTO, nickname)
     )
 
 #endif
+
+struct empty_struct {};
+BOOST_FUSION_ADAPT_STRUCT(empty_struct,)
 
 int
 main()
@@ -138,6 +170,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<point>::value);
         point p = {123, 456, 789};
 
         std::cout << at_c<0>(p) << std::endl;
@@ -159,9 +192,9 @@ main()
     }
 
     {
-        vector<int, float, int> v1(4, 2, 2);
+        vector<int, float, int> v1(4, 2.f, 2);
         point v2 = {5, 3, 3};
-        vector<long, double, int> v3(5, 4, 4);
+        vector<long, double, int> v3(5, 4., 4);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);
@@ -216,13 +249,22 @@ main()
 #endif
 
     {
-        fusion::vector<int, float> v1(4, 2);
+        fusion::vector<int, float> v1(4, 2.f);
         ns::bar v2 = {{5}, 3};
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);
         BOOST_TEST(v2 >= v1);
     }
+
+    {
+        ns::employee emp("John Doe", "jdoe"); 
+        std::cout << at_c<0>(emp) << std::endl;
+        std::cout << at_c<1>(emp) << std::endl;
+
+        fusion::vector<std::string, std::string> v1("John Doe", "jdoe");
+        BOOST_TEST(emp == v1);
+    } 
 
     return boost::report_errors();
 }

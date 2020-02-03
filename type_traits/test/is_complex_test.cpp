@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/is_complex.hpp>
 #endif
+#include "test.hpp"
+#include "check_integral_constant.hpp"
 #include <iostream>
 
 struct bad_struct
@@ -32,6 +32,15 @@ TT_TEST_BEGIN(is_complex)
    BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<std::complex<long double> >::value, true);
    BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<std::complex<double> >::value, true);
    BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<std::complex<float> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<const std::complex<long double> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<const std::complex<double> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<const std::complex<float> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<const volatile std::complex<long double> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<const volatile std::complex<double> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<const volatile std::complex<float> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<volatile std::complex<long double> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<volatile std::complex<double> >::value, true);
+   BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_complex<volatile std::complex<float> >::value, true);
 
 TT_TEST_END
 

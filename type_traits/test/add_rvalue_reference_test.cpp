@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.tt.org/LICENSE_1_0.txt)
 
-#include "../../type_traits/test/test.hpp"
-#include "../../type_traits/test/check_type.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/add_rvalue_reference.hpp>
 #endif
+#include "test.hpp"
+#include "check_type.hpp"
 
 #ifdef BOOST_NO_CXX11_RVALUE_REFERENCES
 
@@ -69,6 +69,11 @@ TT_TEST_BEGIN(add_rvalue_reference)
    add_rvalue_reference_test_13a();
 #endif
 
+   BOOST_CHECK_TYPE(tt::add_rvalue_reference<void>::type, void);
+   BOOST_CHECK_TYPE(tt::add_rvalue_reference<const void>::type, const void);
+   BOOST_CHECK_TYPE(tt::add_rvalue_reference<const volatile void>::type, const volatile void);
+   BOOST_CHECK_TYPE(tt::add_rvalue_reference<volatile void>::type, volatile void);
+   
 TT_TEST_END
 
 

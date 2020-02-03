@@ -17,13 +17,13 @@
   *                paste into regex source.
   */
 
+#include <boost/config.hpp>
 #include <map>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <cctype>
-#include <boost/config.hpp>
 
 std::string g_char_type;
 std::string g_data_type;
@@ -75,7 +75,7 @@ void generate_code()
    std::cout << "};\n\n";
 
    // now the iterator table:
-   std::cout << "static const re_detail::character_pointer_range<" << g_char_type << "> range_data[] = {\n";
+   std::cout << "static const BOOST_REGEX_DETAIL_NS::character_pointer_range<" << g_char_type << "> range_data[] = {\n";
    std::size_t index = 0;
    for(i = g_table.begin(), j = g_table.end(); i != j; ++i)
    {

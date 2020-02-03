@@ -4,8 +4,6 @@
 #   (See accompanying file LICENSE_1_0.txt or copy at
 #   http://www.boost.org/LICENSE_1_0.txt)
 
-project doc/bind ;
-
 import boostbook ;
 import quickbook ;
 
@@ -27,6 +25,8 @@ boostbook standalone_bind
         <xsl:param>toc.max.depth=2
         # How far down we go with TOC's
         <xsl:param>generate.section.toc.level=0
+
+        <xsl:param>generate.manifest=0
      ;
 
 xml mem_fn_ : mem_fn.qbk ;
@@ -47,4 +47,12 @@ boostbook standalone_mem_fn
         <xsl:param>toc.max.depth=2
         # How far down we go with TOC's
         <xsl:param>generate.section.toc.level=0
+
+        <xsl:param>generate.manifest=0
      ;
+
+###############################################################################
+alias boostdoc ;
+explicit boostdoc ;
+alias boostrelease : standalone_bind standalone_mem_fn ;
+explicit boostrelease ;

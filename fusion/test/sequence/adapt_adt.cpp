@@ -103,7 +103,8 @@ namespace ns
   BOOST_FUSION_ADAPT_ADT(
       ns::point,
       (int, int, obj.get_x(), obj.set_x(val))
-      (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_y(), obj.set_y(val))
+      // Mixing auto & BOOST_FUSION_ADAPT_AUTO to test backward compatibility
+      (auto, BOOST_FUSION_ADAPT_AUTO, obj.get_y(), obj.set_y(val))
       (obj.get_z(), obj.set_z(val))
   )
 
@@ -128,26 +129,29 @@ namespace ns
   BOOST_FUSION_ADAPT_ADT(
       ns::point,
       (int, int, obj.get_x(), obj.set_x(val))
-      (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_y(), obj.set_y(val))
-      (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_z(), obj.set_z(val))
+      (auto, auto, obj.get_y(), obj.set_y(val))
+      (auto, auto, obj.get_z(), obj.set_z(val))
   )
 
 #   if !BOOST_WORKAROUND(__GNUC__,<4)
     BOOST_FUSION_ADAPT_ADT(
         ns::point_with_private_members,
-        (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_x(), obj.set_x(val))
-        (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_y(), obj.set_y(val))
-        (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_z(), obj.set_z(val))
+        (auto, auto, obj.get_x(), obj.set_x(val))
+        (auto, auto, obj.get_y(), obj.set_y(val))
+        (auto, auto, obj.get_z(), obj.set_z(val))
     )
 #   endif
 
   BOOST_FUSION_ADAPT_ADT(
       ns::name,
       (const std::string&, const std::string&, obj.get_last(), obj.set_last(val))
-      (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_first(), obj.set_first(val))
+      (BOOST_FUSION_ADAPT_AUTO, auto, obj.get_first(), obj.set_first(val))
   )
 
 #endif
+
+class empty_adt{};
+BOOST_FUSION_ADAPT_ADT(empty_adt,)
 
 int
 main()
@@ -161,6 +165,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<ns::point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<ns::point>::value);
         ns::point p(123, 456, 789);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -182,9 +187,9 @@ main()
     }
 
     {
-        fusion::vector<int, float, int> v1(4, 2, 2);
+        fusion::vector<int, float, int> v1(4, 2.f, 2);
         ns::point v2(5, 3, 3);
-        fusion::vector<long, double, int> v3(5, 4, 4);
+        fusion::vector<long, double, int> v3(5, 4., 4);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);
@@ -233,6 +238,7 @@ main()
 #if !BOOST_WORKAROUND(__GNUC__,<4)
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<ns::point_with_private_members>));
+        BOOST_STATIC_ASSERT(!traits::is_view<ns::point_with_private_members>::value);
         ns::point_with_private_members p(123, 456, 789);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -296,7 +302,7 @@ main()
         BOOST_MPL_ASSERT((
             boost::is_same<
                 boost::fusion::result_of::back<ns::point const>::type::type,
-                const int
+                int
             >));
     }
 

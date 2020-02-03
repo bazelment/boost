@@ -1,48 +1,91 @@
 /*
- * Copyright (c) 2012-2014 Glen Joseph Fernandes 
- * glenfe at live dot com
- *
- * Distributed under the Boost Software License, 
- * Version 1.0. (See accompanying file LICENSE_1_0.txt 
- * or copy at http://boost.org/LICENSE_1_0.txt)
- */
-#include <boost/detail/lightweight_test.hpp>
-#include <boost/smart_ptr/allocate_shared_array.hpp>
+Copyright 2012-2015 Glen Joseph Fernandes
+(glenjofe@gmail.com)
 
-int main() {
+Distributed under the Boost Software License, Version 1.0.
+(http://www.boost.org/LICENSE_1_0.txt)
+*/
+#include <boost/config.hpp>
 #if !defined(BOOST_NO_CXX11_UNIFIED_INITIALIZATION_SYNTAX)
-    {
-        boost::shared_ptr<int[][2]> a1 = boost::allocate_shared<int[][2]>(std::allocator<int>(), 2, {0, 1});
-        BOOST_TEST(a1[0][0] == 0);
-        BOOST_TEST(a1[0][1] == 1);
-        BOOST_TEST(a1[1][0] == 0);
-        BOOST_TEST(a1[1][1] == 1);
+#include <boost/core/lightweight_test.hpp>
+#include <boost/smart_ptr/make_shared.hpp>
+
+template<class T = void>
+struct creator {
+    typedef T value_type;
+
+    template<class U>
+    struct rebind {
+        typedef creator<U> other;
+    };
+
+    creator() { }
+
+    template<class U>
+    creator(const creator<U>&) { }
+
+    T* allocate(std::size_t size) {
+        return static_cast<T*>(::operator new(sizeof(T) * size));
     }
 
-    {
-        boost::shared_ptr<int[2][2]> a1 = boost::allocate_shared<int[2][2]>(std::allocator<int>(), { 0, 1 });
-        BOOST_TEST(a1[0][0] == 0);
-        BOOST_TEST(a1[0][1] == 1);
-        BOOST_TEST(a1[1][0] == 0);
-        BOOST_TEST(a1[1][1] == 1);
+    void deallocate(T* ptr, std::size_t) {
+        ::operator delete(ptr);
     }
+};
 
+template<class T, class U>
+inline bool
+operator==(const creator<T>&, const creator<U>&)
+{
+    return true;
+}
+
+template<class T, class U>
+inline bool
+operator!=(const creator<T>&, const creator<U>&)
+{
+    return false;
+}
+
+int main()
+{
     {
-        boost::shared_ptr<const int[][2]> a1 = boost::allocate_shared<const int[][2]>(std::allocator<int>(), 2, { 0, 1 });
-        BOOST_TEST(a1[0][0] == 0);
-        BOOST_TEST(a1[0][1] == 1);
-        BOOST_TEST(a1[1][0] == 0);
-        BOOST_TEST(a1[1][1] == 1);
+        boost::shared_ptr<int[][2]> result =
+            boost::allocate_shared<int[][2]>(creator<int>(), 2, {0, 1});
+        BOOST_TEST(result[0][0] == 0);
+        BOOST_TEST(result[0][1] == 1);
+        BOOST_TEST(result[1][0] == 0);
+        BOOST_TEST(result[1][1] == 1);
     }
-
     {
-        boost::shared_ptr<const int[2][2]> a1 = boost::allocate_shared<const int[2][2]>(std::allocator<int>(), { 0, 1 });
-        BOOST_TEST(a1[0][0] == 0);
-        BOOST_TEST(a1[0][1] == 1);
-        BOOST_TEST(a1[1][0] == 0);
-        BOOST_TEST(a1[1][1] == 1);
+        boost::shared_ptr<int[2][2]> result =
+            boost::allocate_shared<int[2][2]>(creator<int>(), {0, 1});
+        BOOST_TEST(result[0][0] == 0);
+        BOOST_TEST(result[0][1] == 1);
+        BOOST_TEST(result[1][0] == 0);
+        BOOST_TEST(result[1][1] == 1);
     }
-#endif
-
+    {
+        boost::shared_ptr<const int[][2]> result =
+            boost::allocate_shared<const int[][2]>(creator<>(), 2, {0, 1});
+        BOOST_TEST(result[0][0] == 0);
+        BOOST_TEST(result[0][1] == 1);
+        BOOST_TEST(result[1][0] == 0);
+        BOOST_TEST(result[1][1] == 1);
+    }
+    {
+        boost::shared_ptr<const int[2][2]> result =
+            boost::allocate_shared<const int[2][2]>(creator<>(), {0, 1});
+        BOOST_TEST(result[0][0] == 0);
+        BOOST_TEST(result[0][1] == 1);
+        BOOST_TEST(result[1][0] == 0);
+        BOOST_TEST(result[1][1] == 1);
+    }
     return boost::report_errors();
 }
+#else
+int main()
+{
+    return 0;
+}
+#endif

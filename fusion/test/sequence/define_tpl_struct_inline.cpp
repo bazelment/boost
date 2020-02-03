@@ -61,6 +61,7 @@ void run_test()
     
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<Point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<Point>::value);
         Point p(123, 456);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -80,9 +81,9 @@ void run_test()
     }
 
     {
-        vector<int, float> v1(4, 2);
+        vector<int, float> v1(4, 2.f);
         Point v2(5, 3);
-        vector<long, double> v3(5, 4);
+        vector<long, double> v3(5, 4.);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);

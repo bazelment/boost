@@ -6,11 +6,49 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "test.hpp"
+#include <boost/config.hpp>
+
+#if !(defined(BOOST_MSVC) && defined(BOOST_TT_DISABLE_INTRINSICS) && defined(CI_SUPPRESS_KNOWN_ISSUES))
+
 #include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/is_nothrow_move_constructible.hpp>
+#endif
+
+struct non_copy
+{
+   non_copy();
+private:
+   non_copy(const non_copy&);
+};
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+
+struct delete_copy
+{
+   delete_copy();
+   delete_copy(const delete_copy&) = delete;
+};
+
+#endif
+
+#ifndef BOOST_NO_CXX11_NOEXCEPT
+
+struct noexcept_copy
+{
+   noexcept_copy();
+   noexcept_copy(const noexcept_copy&)noexcept;
+};
+
+struct noexcept_move
+{
+   noexcept_move();
+   noexcept_move(const noexcept_move&);
+   noexcept_move(noexcept_move&&)noexcept;
+};
+
 #endif
 
 TT_TEST_BEGIN(is_nothrow_move_constructible)
@@ -181,11 +219,11 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<mp>::value, tr
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<cmf>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<enum_UDT>::value, true);
 
-BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int&>::value, false);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int&>::value, true);
 #ifndef BOOST_NO_CXX11_RVALUE_REFERENCES
-BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int&&>::value, false);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int&&>::value, true);
 #endif
-BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<const int&>::value, false);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<const int&>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int[2]>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int[3][2]>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<int[2][4][5][6][3]>::value, false);
@@ -196,8 +234,10 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<empty_POD_UDT>
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<POD_UDT>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<POD_union_UDT>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<empty_POD_union_UDT>::value, true);
+#if !defined(BOOST_GCC) || (BOOST_GCC >= 40800)
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<nothrow_copy_UDT>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<nothrow_move_UDT>::value, true);
+#endif
 #else
 // cases we would like to succeed but can't implement in the language:
 BOOST_CHECK_SOFT_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<empty_POD_UDT>::value, true, false);
@@ -208,9 +248,31 @@ BOOST_CHECK_SOFT_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<nothrow_c
 #endif
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<nothrow_assign_UDT>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<nothrow_construct_UDT>::value, false);
+#if !defined(BOOST_GCC) || (BOOST_GCC >= 40700)
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<test_abc1>::value, false);
+#endif
+
+#if !defined(BOOST_GCC) || (BOOST_GCC >= 40800)
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<non_copy>::value, false);
+#endif
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<delete_copy>::value, false);
+#endif
+
+#if !defined(BOOST_NO_CXX11_NOEXCEPT) && !defined(BOOST_NO_SFINAE_EXPR)
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<noexcept_copy>::value, true);
+#if !defined(BOOST_GCC) || (BOOST_GCC >= 40800)
+// Test fails on gcc 4.7.x:
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_constructible<noexcept_move>::value, true);
+#endif
+#endif
 
 TT_TEST_END
 
+#else
 
+int main() { return 0; }
+
+#endif
 

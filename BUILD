@@ -77,6 +77,10 @@ boost_library(
     name = "container",
 )
 
+boost_library(
+    name = "container_hash",
+)
+
 CONTEXT_K8_LINUX_ASM = [
     "context/src/asm/jump_x86_64_sysv_elf_gas.S",
     "context/src/asm/make_x86_64_sysv_elf_gas.S",
@@ -85,7 +89,7 @@ CONTEXT_K8_LINUX_ASM = [
 boost_library(
     name = "context",
     srcs = [
-        "context/src/execution_context.cpp",
+        # "context/src/fiber.cpp",
     ] + CONTEXT_K8_LINUX_ASM,
     copts = [
         "-fsplit-stack",
@@ -130,8 +134,15 @@ boost_library(
     srcs = glob([
         "filesystem/src/*.cpp",
     ]),
+    copts = [
+        "-Ifilesystem/src",
+    ],
+    hdrs = [
+        "filesystem/src/error_handling.hpp",
+    ],
     deps = [
         ":config",
+	":container_hash",
         ":functional",
         ":io",
         ":iterator",
@@ -318,6 +329,7 @@ boost_library(
     deps = [
         ":assert",
         ":config",
+	":container_hash",
         ":functional",
         ":integer",
         ":mpl",
@@ -424,4 +436,35 @@ boost_library(
 
 boost_library(
     name = "version",
+)
+
+cc_test(
+    name = "filesystem_test_quick",
+    srcs = [
+        "filesystem/test/quick.cpp",
+    ],
+    deps = [
+        ":filesystem",
+    ]
+)
+
+cc_test(
+    name = "regex_test_quick",
+    srcs = [
+        "regex/test/quick.cpp",
+    ],
+    deps = [
+        ":regex",
+        ":core",
+    ]
+)
+
+cc_test(
+    name = "system_test_error_code_test",
+    srcs =[
+        "system/test/error_code_test.cpp",
+    ],
+    deps = [
+        ":system",
+    ]
 )

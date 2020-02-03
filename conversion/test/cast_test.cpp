@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <boost/polymorphic_cast.hpp>
+#include <boost/core/lightweight_test.hpp>
 
 using namespace boost;
 using std::cout;
@@ -51,35 +52,31 @@ int main( int argc, char * argv[] )
 //  test polymorphic_cast  ---------------------------------------------------//
 
     //  tests which should succeed
-    Base *    base = new Derived;
-    Base2 *   base2 = 0;
-    Derived * derived = 0;
-    derived = polymorphic_downcast<Derived*>( base );  // downcast
-    assert( derived->kind() == 'D' );
+    Derived derived_instance;
+    Base * base = &derived_instance;
+    Derived * derived = polymorphic_downcast<Derived*>( base );  // downcast
+    BOOST_TEST( derived->kind() == 'D' );
 
-    derived = 0;
     derived = polymorphic_cast<Derived*>( base ); // downcast, throw on error
-    assert( derived->kind() == 'D' );
+    BOOST_TEST( derived->kind() == 'D' );
 
-    base2 = polymorphic_cast<Base2*>( base ); // crosscast
-    assert( base2->kind2() == '2' );
+    Base2 *   base2 =  polymorphic_cast<Base2*>( base ); // crosscast
+    BOOST_TEST( base2->kind2() == '2' );
 
      //  tests which should result in errors being detected
-    int err_count = 0;
-    base = new Base;
+    Base base_instance;
+    base = &base_instance;
 
     if ( argc > 1 && *argv[1] == '1' )
         { derived = polymorphic_downcast<Derived*>( base ); } // #1 assert failure
 
     bool caught_exception = false;
     try { derived = polymorphic_cast<Derived*>( base ); }
-    catch (std::bad_cast)
+    catch (const std::bad_cast&)
         { cout<<"caught bad_cast\n"; caught_exception = true; }
-    if ( !caught_exception ) ++err_count;
+    BOOST_TEST( caught_exception );
     //  the following is just so generated code can be inspected
-    if ( derived->kind() == 'B' ) ++err_count;
+    BOOST_TEST( derived->kind() != 'B' );
 
-    cout << err_count << " errors detected\nTest "
-         << (err_count==0 ? "passed\n" : "failed\n");
-    return err_count;
+    return boost::report_errors();
 }   // main

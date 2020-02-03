@@ -1,14 +1,13 @@
 /*
- (c) 2014 Glen Joseph Fernandes
- glenjofe at gmail dot com
+Copyright 2014 Glen Joseph Fernandes
+(glenjofe@gmail.com)
 
- Distributed under the Boost Software
- License, Version 1.0.
- http://boost.org/LICENSE_1_0.txt
+Distributed under the Boost Software License, Version 1.0.
+(http://www.boost.org/LICENSE_1_0.txt)
 */
-#include <boost/config.hpp>
 #include <boost/align/alignment_of.hpp>
 #include <boost/core/lightweight_test.hpp>
+#include <boost/config.hpp>
 #include <cstddef>
 
 template<class T>
@@ -44,51 +43,39 @@ struct remove_all_extents<T[N]> {
 };
 
 template<class T>
-struct remove_const {
-    typedef T type;
-};
-
-template<class T>
-struct remove_const<const T> {
-    typedef T type;
-};
-
-template<class T>
-struct remove_volatile {
-    typedef T type;
-};
-
-template<class T>
-struct remove_volatile<volatile T> {
-    typedef T type;
-};
-
-template<class T>
 struct remove_cv {
-    typedef typename remove_volatile<typename
-        remove_const<T>::type>::type type;
+    typedef T type;
 };
 
 template<class T>
-struct padding {
-    char offset;
+struct remove_cv<const T> {
+    typedef T type;
+};
+
+template<class T>
+struct remove_cv<volatile T> {
+    typedef T type;
+};
+
+template<class T>
+struct remove_cv<const volatile T> {
+    typedef T type;
+};
+
+template<class T>
+struct offset_value {
+    char value;
     typename remove_cv<typename remove_all_extents<typename
         remove_reference<T>::type>::type>::type object;
 };
 
 template<class T>
-std::size_t offset()
-{
-    static padding<T> p = padding<T>();
-    return (char*)&p.object - &p.offset;
-}
-
-template<class T>
 void test_type()
 {
-    std::size_t result = boost::alignment::
-        alignment_of<T>::value;
-    BOOST_TEST_EQ(result, offset<T>());
+    enum {
+        N = boost::alignment::alignment_of<T>::value
+    };
+    BOOST_TEST(offsetof(offset_value<T>, object) == N);
 }
 
 template<class T>
@@ -120,18 +107,12 @@ void test_cv()
 }
 
 template<class T>
-struct W1 {
+struct Struct {
     T t;
 };
 
 template<class T>
-class W2 {
-public:
-    T t;
-};
-
-template<class T>
-union W3 {
+union Union {
     T t;
 };
 
@@ -139,9 +120,8 @@ template<class T>
 void test()
 {
     test_cv<T>();
-    test_cv<W1<T> >();
-    test_cv<W2<T> >();
-    test_cv<W3<T> >();
+    test_cv<Struct<T> >();
+    test_cv<Union<T> >();
 }
 
 void test_integral()
@@ -202,11 +182,11 @@ void test_pointer()
 void test_member_pointer()
 {
     test<int X::*>();
-    test<int (X::*)()>();
+    test<int(X::*)()>();
 }
 
 enum E {
-    v = 1
+    V = 1
 };
 
 void test_enum()

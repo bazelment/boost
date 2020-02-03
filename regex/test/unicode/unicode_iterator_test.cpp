@@ -17,10 +17,14 @@
   */
 
 #include <boost/regex/pending/unicode_iterator.hpp>
-#include <boost/test/included/test_exec_monitor.hpp>
+#include <boost/detail/lightweight_main.hpp>
+#include "../test_macros.hpp"
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <iostream>
+#include <iomanip>
+#include <cstring>
 
 #if !defined(TEST_UTF8) && !defined(TEST_UTF16)
 #  define TEST_UTF8
@@ -153,22 +157,30 @@ void spot_checks()
 void test(const std::vector< ::boost::uint32_t>& v)
 {
    typedef std::vector< ::boost::uint32_t> vector32_type;
+#ifdef TEST_UTF16
    typedef std::vector< ::boost::uint16_t> vector16_type;
+#endif
    typedef std::vector< ::boost::uint8_t>  vector8_type;
+#ifdef TEST_UTF16
    typedef boost::u32_to_u16_iterator<vector32_type::const_iterator, ::boost::uint16_t> u32to16type;
    typedef boost::u16_to_u32_iterator<vector16_type::const_iterator, ::boost::uint32_t> u16to32type;
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) && !defined(BOOST_NO_STD_ITERATOR) && !defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
    typedef std::reverse_iterator<u32to16type> ru32to16type;
    typedef std::reverse_iterator<u16to32type> ru16to32type;
 #endif
+#endif // TEST_UTF16
+#ifdef TEST_UTF8
    typedef boost::u32_to_u8_iterator<vector32_type::const_iterator, ::boost::uint8_t> u32to8type;
    typedef boost::u8_to_u32_iterator<vector8_type::const_iterator, ::boost::uint32_t> u8to32type;
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) && !defined(BOOST_NO_STD_ITERATOR) && !defined(_RWSTD_NO_CLASS_PARTIAL_SPEC)
    typedef std::reverse_iterator<u32to8type> ru32to8type;
    typedef std::reverse_iterator<u8to32type> ru8to32type;
 #endif
+#endif // TEST_UTF8
    vector8_type  v8;
+#ifdef TEST_UTF16
    vector16_type v16;
+#endif
    vector32_type v32;
    vector32_type::const_iterator i, j, k;
 
@@ -294,27 +306,12 @@ void test(const std::vector< ::boost::uint32_t>& v)
 #endif
 }
 
-int test_main( int, char* [] ) 
+int cpp_main( int, char* [] ) 
 {
    // test specific value points from the standard:
    spot_checks();
    // now test a bunch of values for self-consistency and round-tripping:
    std::vector< ::boost::uint32_t> v;
-   // start with boundary conditions:
-   /*
-   v.push_back(0);
-   v.push_back(0xD7FF);
-   v.push_back(0xE000);
-   v.push_back(0xFFFF);
-   v.push_back(0x10000);
-   v.push_back(0x10FFFF);
-   v.push_back(0x80u);
-   v.push_back(0x80u - 1);
-   v.push_back(0x800u);
-   v.push_back(0x800u - 1);
-   v.push_back(0x10000u);
-   v.push_back(0x10000u - 1);
-   */
    for(unsigned i = 0; i < 0xD800; ++i)
       v.push_back(i);
    for(unsigned i = 0xDFFF + 1; i < 0x10FFFF; ++i)
@@ -323,4 +320,3 @@ int test_main( int, char* [] )
    return 0;
 }
 
-#include <boost/test/included/test_exec_monitor.hpp>

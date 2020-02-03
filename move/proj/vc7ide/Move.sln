@@ -107,6 +107,42 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adl_move_swap", "adl_move_s
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "type_traits", "type_traits.vcproj", "{D7C28A23-8621-FE05-BF87-3C7B6176BD02}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bench_sort", "bench_sort.vcproj", "{CD2617A8-6217-9EB7-24CE-6C9AA035376A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bench_merge", "bench_merge.vcproj", "{CD2617A8-6217-9EB7-24CE-6C9AA035376A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adaptive_sort_test", "adaptive_sort_test.vcproj", "{CD617A28-6217-B79E-4CE2-6BA035379A6A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adaptive_merge_test", "adaptive_merge_test.vcproj", "{CD617A28-6217-B79E-4CE2-6BA035379A6A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "doc_template_assign", "doc_template_assign.vcproj", "{7460CA18-D532-E4F8-F1F2-3A796D2A91E2}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "inplace_merge_test", "inplace_merge_test.vcproj", "{CD617C28-62B7-CE9E-0000-000000000000}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algo_test", "algo_test.vcproj", "{C8AD2618-79EB-8612-42FE-2A3AC9667A13}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_movelib", "move.vcproj", "{F6BAFC51-6BBD-2EC3-B204-9A67C31325A3}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -223,33 +259,42 @@ Global
 		{CD2617A8-79EB-6172-2CE4-26617AA3AC93}.Debug.Build.0 = Debug|Win32
 		{CD2617A8-79EB-6172-2CE4-26617AA3AC93}.Release.ActiveCfg = Release|Win32
 		{CD2617A8-79EB-6172-2CE4-26617AA3AC93}.Release.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionItems) = postSolution
-		..\..\..\..\boost\move\adl_move_swap.hpp = ..\..\..\..\boost\move\adl_move_swap.hpp
-		..\..\..\..\boost\move\algorithm.hpp = ..\..\..\..\boost\move\algorithm.hpp
-		..\..\..\..\boost\move\detail\config_begin.hpp = ..\..\..\..\boost\move\detail\config_begin.hpp
-		..\..\..\..\boost\move\detail\config_end.hpp = ..\..\..\..\boost\move\detail\config_end.hpp
-		..\..\..\..\boost\move\core.hpp = ..\..\..\..\boost\move\core.hpp
-		..\..\..\..\boost\move\default_delete.hpp = ..\..\..\..\boost\move\default_delete.hpp
-		..\..\..\..\boost\move\detail\fwd_macros.hpp = ..\..\..\..\boost\move\detail\fwd_macros.hpp
-		..\..\..\..\boost\move\iterator.hpp = ..\..\..\..\boost\move\iterator.hpp
-		..\..\..\..\boost\move\detail\iterator_traits.hpp = ..\..\..\..\boost\move\detail\iterator_traits.hpp
-		..\..\doc\Jamfile.v2 = ..\..\doc\Jamfile.v2
-		..\..\..\..\boost\move\make_unique.hpp = ..\..\..\..\boost\move\make_unique.hpp
-		..\..\..\..\boost\move\detail\meta_utils.hpp = ..\..\..\..\boost\move\detail\meta_utils.hpp
-		..\..\..\..\boost\move\detail\meta_utils_core.hpp = ..\..\..\..\boost\move\detail\meta_utils_core.hpp
-		..\..\..\..\boost\move\move.hpp = ..\..\..\..\boost\move\move.hpp
-		..\..\doc\move.qbk = ..\..\doc\move.qbk
-		..\..\..\..\boost\move\detail\move_helpers.hpp = ..\..\..\..\boost\move\detail\move_helpers.hpp
-		..\..\..\..\boost\move\traits.hpp = ..\..\..\..\boost\move\traits.hpp
-		..\..\..\..\boost\move\detail\type_traits.hpp = ..\..\..\..\boost\move\detail\type_traits.hpp
-		..\..\..\..\boost\move\unique_ptr.hpp = ..\..\..\..\boost\move\unique_ptr.hpp
-		..\..\..\..\boost\move\detail\unique_ptr_meta_utils.hpp = ..\..\..\..\boost\move\detail\unique_ptr_meta_utils.hpp
-		..\..\test\unique_ptr_test_utils_beg.hpp = ..\..\test\unique_ptr_test_utils_beg.hpp
-		..\..\test\unique_ptr_test_utils_end.hpp = ..\..\test\unique_ptr_test_utils_end.hpp
-		..\..\..\..\boost\move\utility.hpp = ..\..\..\..\boost\move\utility.hpp
-		..\..\..\..\boost\move\utility_core.hpp = ..\..\..\..\boost\move\utility_core.hpp
-		..\..\..\..\boost\move\detail\workaround.hpp = ..\..\..\..\boost\move\detail\workaround.hpp
+		{D7C28A23-8621-FE05-BF87-3C7B6176BD02}.Debug.ActiveCfg = Debug|Win32
+		{D7C28A23-8621-FE05-BF87-3C7B6176BD02}.Debug.Build.0 = Debug|Win32
+		{D7C28A23-8621-FE05-BF87-3C7B6176BD02}.Release.ActiveCfg = Release|Win32
+		{D7C28A23-8621-FE05-BF87-3C7B6176BD02}.Release.Build.0 = Release|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Debug.ActiveCfg = Debug|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Debug.Build.0 = Debug|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Release.ActiveCfg = Release|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Release.Build.0 = Release|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Debug.ActiveCfg = Debug|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Debug.Build.0 = Debug|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Release.ActiveCfg = Release|Win32
+		{CD2617A8-6217-9EB7-24CE-6C9AA035376A}.Release.Build.0 = Release|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Debug.ActiveCfg = Debug|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Debug.Build.0 = Debug|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Release.ActiveCfg = Release|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Release.Build.0 = Release|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Debug.ActiveCfg = Debug|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Debug.Build.0 = Debug|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Release.ActiveCfg = Release|Win32
+		{CD617A28-6217-B79E-4CE2-6BA035379A6A}.Release.Build.0 = Release|Win32
+		{7460CA18-D532-E4F8-F1F2-3A796D2A91E2}.Debug.ActiveCfg = Debug|Win32
+		{7460CA18-D532-E4F8-F1F2-3A796D2A91E2}.Debug.Build.0 = Debug|Win32
+		{7460CA18-D532-E4F8-F1F2-3A796D2A91E2}.Release.ActiveCfg = Release|Win32
+		{7460CA18-D532-E4F8-F1F2-3A796D2A91E2}.Release.Build.0 = Release|Win32
+		{CD617C28-62B7-CE9E-0000-000000000000}.Debug.ActiveCfg = Debug|Win32
+		{CD617C28-62B7-CE9E-0000-000000000000}.Debug.Build.0 = Debug|Win32
+		{CD617C28-62B7-CE9E-0000-000000000000}.Release.ActiveCfg = Release|Win32
+		{CD617C28-62B7-CE9E-0000-000000000000}.Release.Build.0 = Release|Win32
+		{C8AD2618-79EB-8612-42FE-2A3AC9667A13}.Debug.ActiveCfg = Debug|Win32
+		{C8AD2618-79EB-8612-42FE-2A3AC9667A13}.Debug.Build.0 = Debug|Win32
+		{C8AD2618-79EB-8612-42FE-2A3AC9667A13}.Release.ActiveCfg = Release|Win32
+		{C8AD2618-79EB-8612-42FE-2A3AC9667A13}.Release.Build.0 = Release|Win32
+		{F6BAFC51-6BBD-2EC3-B204-9A67C31325A3}.Debug.ActiveCfg = Debug|Win32
+		{F6BAFC51-6BBD-2EC3-B204-9A67C31325A3}.Debug.Build.0 = Debug|Win32
+		{F6BAFC51-6BBD-2EC3-B204-9A67C31325A3}.Release.ActiveCfg = Release|Win32
+		{F6BAFC51-6BBD-2EC3-B204-9A67C31325A3}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

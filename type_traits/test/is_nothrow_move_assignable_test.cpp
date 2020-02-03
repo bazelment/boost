@@ -5,12 +5,43 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <boost/config.hpp>
 #include "test.hpp"
 #include "check_integral_constant.hpp"
+
+#if !((defined(BOOST_MSVC) || BOOST_WORKAROUND(BOOST_GCC, < 40700)) && defined(BOOST_TT_DISABLE_INTRINSICS) && defined(CI_SUPPRESS_KNOWN_ISSUES))
+
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/is_nothrow_move_assignable.hpp>
+#endif
+
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+
+struct non_assignable
+{
+   non_assignable();
+   non_assignable& operator=(const non_assignable&) = delete;
+};
+
+#endif
+
+#ifndef BOOST_NO_CXX11_NOEXCEPT
+
+struct noexcept_assignable
+{
+   noexcept_assignable();
+   noexcept_assignable& operator=(const non_assignable&)noexcept;
+};
+
+struct noexcept_move_assignable
+{
+   noexcept_move_assignable();
+   noexcept_move_assignable& operator=(const noexcept_move_assignable&);
+   noexcept_move_assignable& operator=(noexcept_move_assignable&&)noexcept;
+};
+
 #endif
 
 TT_TEST_BEGIN(is_nothrow_move_assignable)
@@ -189,9 +220,11 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<int&>::value, fal
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<int&&>::value, false);
 #endif
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<const int&>::value, false);
+#if !(defined(BOOST_MSVC) && defined(CI_SUPPRESS_KNOWN_ISSUES) && (BOOST_MSVC < 1910))
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<int[2]>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<int[3][2]>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<int[2][4][5][6][3]>::value, false);
+#endif
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<UDT>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<empty_UDT>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<void>::value, false);
@@ -214,7 +247,19 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<nothrow_copy_UDT>
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<nothrow_construct_UDT>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<test_abc1>::value, false);
 
+#ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<non_assignable>::value, false);
+#endif
+#if !defined(BOOST_NO_CXX11_NOEXCEPT) && !defined(BOOST_NO_SFINAE_EXPR) && !BOOST_WORKAROUND(BOOST_GCC, < 40700)
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<noexcept_assignable>::value, true);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_nothrow_move_assignable<noexcept_move_assignable>::value, true);
+#endif
+
 TT_TEST_END
 
+#else
 
+int main() { return 0; }
+
+#endif
 

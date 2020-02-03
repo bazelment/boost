@@ -1,8 +1,10 @@
-[article Predef
+[article Boost.Predef
     [quickbook 1.7]
-    [version 1.2]
+    [version 1.10]
     [authors [Rivera, Rene]]
-    [copyright 2005, 2008-2014 Rene Rivera]
+    [copyright 2005-2019 Rene Rivera]
+    [copyright 2015 Charly Chevalier]
+    [copyright 2015 Joel Falcou]
     [purpose Identification and specification of predefined macros.]
     [license
         Distributed under the Boost Software License, Version 1.0.
@@ -10,6 +12,9 @@
         [@http://www.boost.org/LICENSE_1_0.txt])
     ]
     [source-mode c++]
+    [category miscellaneous]
+    [id predef]
+    [dirname predef]
 ]
 
 [section Introduction]
@@ -109,12 +114,8 @@ done:
 * Additionally, even if there is no auto-configure style option.. It would be
   good to add optionally included headers so that user can get consistent
   version number definitions for libraries they use.
-* Having a consistent set of version number definitions opens the door to
-  improving the user level syntax of libraries that do checks against version
-  numbers. Specifically Boost Config's `BOOST_WORKAROUND` macro would benefit
-  from a more readable syntax. As would the `BOOST_TESTED_AT` detail macro.
 * And obviously there's lots of work to do in reformulating the existing
-  Boost libraries to use the Predef library once it's accepted.
+  Boost libraries to use the Predef library.
 * And there's the continuing work of adding definitions for present and
   future compilers, platforms, architectures, languages, and libraries.
 
@@ -143,6 +144,8 @@ macros of a particular prefix:
 * `BOOST_OS_` for the operating system we are compiling to.
 * `BOOST_PLAT_` for platforms on top of operating system or compilers.
 * `BOOST_ENDIAN_` for endianness of the os and architecture combination.
+* `BOOST_HW_` for hardware specific features.
+* `BOOST_HW_SIMD` for SIMD (Single Instruction Multiple Data) detection.
 
 [note The detected definitions are for the configuration one is targeting
 during the compile. In particular in a cross-compile this means the target
@@ -232,7 +235,7 @@ commonly emulated by other compilers by defining the same base macros. To
 account for this detection headers are allowed to define `*_EMULATED` predefs
 when this situation is detected. The emulated predefs will be set to the
 version number of the detection instead of the regular predef macro for that
-detection. For example MSVC will set `BOOST_COMP_MSVC_EMULATED` but not set `BOOST_COM_MSVC`, and it will also set `BOOST_COMP_MSVC_AVAILABLE`.
+detection. For example MSVC will set `BOOST_COMP_MSVC_EMULATED` but not set `BOOST_COMP_MSVC`, and it will also set `BOOST_COMP_MSVC_AVAILABLE`.
 
 [heading Using the `BOOST_VERSION_NUMBER` macro]
 
@@ -398,7 +401,7 @@ We also need to provide the `*_AVAILABLE` versions of the predef.
 And for convenience we also want to provide a `*_NAME` macro:
 
 ``
-#define BOOST_catagory_tag_NAME "Name"
+#define BOOST_category_tag_NAME "Name"
 ``
 
 The testing of the predef macros is automated to generate checks for all
@@ -504,7 +507,7 @@ uses a simple 3-digit version macro (M,N,P). It can be decomposed
 and defined as:
 
 ``
-#define BOOST_CCOMP_EDG BOOST_PREDEF_MAKE_N_N_N(__EDG_VERSION__)
+#define BOOST_COMP_EDG BOOST_PREDEF_MAKE_N_N_N(__EDG_VERSION__)
 ``
 
 The decomposition macros are split into three types: decimal
@@ -545,6 +548,10 @@ and "Y", "M", "D" for dates.
 
 [section `BOOST_PLAT` platform macros]
 [include ../include/boost/predef/platform/*.h]
+[endsect]
+
+[section `BOOST_HW` hardware macros]
+[include ../include/boost/predef/hardware/*.h]
 [endsect]
 
 [section Other macros]
@@ -611,7 +618,7 @@ version information available in Predef. The basic use is simple:
 
 [teletype]
 ``
-import path-to-predef-src/check/predef
+import path-to-predef-src/tools/check/predef
     : check require
     : predef-check predef-require ;
 
@@ -627,7 +634,7 @@ For example:
 
 [teletype]
 ``
-import path-to-predef-src/check/predef
+import path-to-predef-src/tools/check/predef
     : check require
     : predef-check predef-require ;
 
@@ -649,6 +656,21 @@ rule require ( expressions + : language ? )
 ``
 [c++]
 
+The expression can also use explicit "and", "or" logical operators
+to for more complex checks:
+
+
+[teletype]
+``
+import path-to-predef-src/tools/check/predef
+    : check require
+    : predef-check predef-require ;
+
+lib my_special_lib : source.cpp
+    : [ predef-require "BOOST_OS_WINDOWS" or "BOOST_OS_VMS"] ;
+``
+[c++]
+
 You can use the [^check] rule for more control and to implement
 something other than control of what gets built. The definition
 for the [^check] rule is:
@@ -667,13 +689,13 @@ features in your programs:
 
 [teletype]
 ``
-import path-to-predef-src/check/predef
+import path-to-predef-src/tools/check/predef
     : check require
     : predef-check predef-require ;
 
 exe my_special_exe : source.cpp
     : [ predef-check "BOOST_OS_WINDOWS == 0"
-        : <define>ENABLE_WMF=0
+        : : <define>ENABLE_WMF=0
         : <define>ENABLE_WMF=1 ] ;
 ``
 [c++]

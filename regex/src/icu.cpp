@@ -28,7 +28,7 @@
 
 namespace boost{
 
-namespace re_detail{
+namespace BOOST_REGEX_DETAIL_NS{
 
 icu_regex_traits_implementation::string_type icu_regex_traits_implementation::do_transform(const char_type* p1, const char_type* p2, const U_NAMESPACE_QUALIFIER Collator* pcoll) const
 {
@@ -191,7 +191,7 @@ icu_regex_traits::char_class_type icu_regex_traits::lookup_icu_mask(const ::UCha
       /* zs */  'z', 's', 
    };
 
-   static const re_detail::character_pointer_range< ::UChar32> range_data[] = {
+   static const BOOST_REGEX_DETAIL_NS::character_pointer_range< ::UChar32> range_data[] = {
       { prop_name_table+0, prop_name_table+3, }, // any
       { prop_name_table+3, prop_name_table+8, }, // ascii
       { prop_name_table+8, prop_name_table+16, }, // assigned
@@ -354,11 +354,11 @@ icu_regex_traits::char_class_type icu_regex_traits::lookup_icu_mask(const ::UCha
    };
 
 
-   static const re_detail::character_pointer_range< ::UChar32>* ranges_begin = range_data;
-   static const re_detail::character_pointer_range< ::UChar32>* ranges_end = range_data + (sizeof(range_data)/sizeof(range_data[0]));
+   static const BOOST_REGEX_DETAIL_NS::character_pointer_range< ::UChar32>* ranges_begin = range_data;
+   static const BOOST_REGEX_DETAIL_NS::character_pointer_range< ::UChar32>* ranges_end = range_data + (sizeof(range_data)/sizeof(range_data[0]));
    
-   re_detail::character_pointer_range< ::UChar32> t = { p1, p2, };
-   const re_detail::character_pointer_range< ::UChar32>* p = std::lower_bound(ranges_begin, ranges_end, t);
+   BOOST_REGEX_DETAIL_NS::character_pointer_range< ::UChar32> t = { p1, p2, };
+   const BOOST_REGEX_DETAIL_NS::character_pointer_range< ::UChar32>* p = std::lower_bound(ranges_begin, ranges_end, t);
    if((p != ranges_end) && (t == *p))
       return icu_class_map[p - ranges_begin];
    return 0;
@@ -392,7 +392,7 @@ icu_regex_traits::char_class_type icu_regex_traits::lookup_classname(const char_
       char_class_type(U_GC_ND_MASK) | mask_xdigit,
    };
 
-   int idx = ::boost::re_detail::get_default_class_id(p1, p2);
+   int idx = ::boost::BOOST_REGEX_DETAIL_NS::get_default_class_id(p1, p2);
    if(idx >= 0)
       return masks[idx+1];
    char_class_type result = lookup_icu_mask(p1, p2);
@@ -415,7 +415,7 @@ icu_regex_traits::char_class_type icu_regex_traits::lookup_classname(const char_
          }
       }
       if(s.size())
-         idx = ::boost::re_detail::get_default_class_id(&*s.begin(), &*s.begin() + s.size());
+         idx = ::boost::BOOST_REGEX_DETAIL_NS::get_default_class_id(&*s.begin(), &*s.begin() + s.size());
       if(idx >= 0)
          return masks[idx+1];
       if(s.size())
@@ -430,7 +430,11 @@ icu_regex_traits::char_class_type icu_regex_traits::lookup_classname(const char_
 icu_regex_traits::string_type icu_regex_traits::lookup_collatename(const char_type* p1, const char_type* p2) const
 {
    string_type result;
+#ifdef BOOST_NO_CXX98_BINDERS
+   if(std::find_if(p1, p2, std::bind(std::greater< ::UChar32>(), std::placeholders::_1, 0x7f)) == p2)
+#else
    if(std::find_if(p1, p2, std::bind2nd(std::greater< ::UChar32>(), 0x7f)) == p2)
+#endif
    {
 #ifndef BOOST_NO_TEMPLATED_ITERATOR_CONSTRUCTORS
       std::string s(p1, p2);
@@ -457,7 +461,7 @@ icu_regex_traits::string_type icu_regex_traits::lookup_collatename(const char_ty
          return result;
       }
       // try POSIX name:
-      s = ::boost::re_detail::lookup_default_collate_name(s);
+      s = ::boost::BOOST_REGEX_DETAIL_NS::lookup_default_collate_name(s);
 #ifndef BOOST_NO_TEMPLATED_ITERATOR_CONSTRUCTORS
       result.assign(s.begin(), s.end());
 #else
@@ -477,7 +481,7 @@ icu_regex_traits::string_type icu_regex_traits::lookup_collatename(const char_ty
 bool icu_regex_traits::isctype(char_type c, char_class_type f) const
 {
    // check for standard catagories first:
-   char_class_type m = char_class_type(1u << u_charType(c));
+   char_class_type m = char_class_type(static_cast<char_class_type>(1) << u_charType(c));
    if((m & f) != 0) 
       return true;
    // now check for special cases:
@@ -495,9 +499,9 @@ bool icu_regex_traits::isctype(char_type c, char_class_type f) const
       return true;
    if(((f & mask_ascii) != 0) && (c <= 0x7F))
       return true;
-   if(((f & mask_vertical) != 0) && (::boost::re_detail::is_separator(c) || (c == static_cast<char_type>('\v')) || (m == U_GC_ZL_MASK) || (m == U_GC_ZP_MASK)))
+   if(((f & mask_vertical) != 0) && (::boost::BOOST_REGEX_DETAIL_NS::is_separator(c) || (c == static_cast<char_type>('\v')) || (m == U_GC_ZL_MASK) || (m == U_GC_ZP_MASK)))
       return true;
-   if(((f & mask_horizontal) != 0) && !::boost::re_detail::is_separator(c) && u_isspace(c) && (c != static_cast<char_type>('\v')))
+   if(((f & mask_horizontal) != 0) && !::boost::BOOST_REGEX_DETAIL_NS::is_separator(c) && u_isspace(c) && (c != static_cast<char_type>('\v')))
       return true;
    return false;
 }

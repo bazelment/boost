@@ -10,6 +10,7 @@
 #define BOOST_THREAD_EXECUTORS_EXECUTOR_HPP
 
 #include <boost/thread/detail/config.hpp>
+#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION && defined BOOST_THREAD_PROVIDES_EXECUTORS && defined BOOST_THREAD_USES_MOVE
 
 #include <boost/thread/detail/delete.hpp>
 #include <boost/thread/detail/move.hpp>
@@ -38,7 +39,7 @@ namespace boost
      * \par Synchronization
      * The completion of all the closures happen before the completion of the executor destructor.
      */
-    virtual ~executor() {};
+    virtual ~executor() {}
 
     /**
      * \par Effects
@@ -99,9 +100,10 @@ namespace boost
     }
 
     template <typename Closure>
-    void submit(BOOST_THREAD_RV_REF(Closure) closure)
+    void submit(BOOST_THREAD_FWD_REF(Closure) closure)
     {
-      work w = boost::move(closure);
+      //submit(work(boost::forward<Closure>(closure)));
+      work w((boost::forward<Closure>(closure)));
       submit(boost::move(w));
     }
 
@@ -144,4 +146,5 @@ namespace boost
 
 #include <boost/config/abi_suffix.hpp>
 
+#endif
 #endif

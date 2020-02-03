@@ -21,6 +21,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace boost
 {
@@ -48,6 +49,23 @@ namespace boost
         {
             template< class IntegerT >
             bool operator()( IntegerT x ) const { return x % 2 != 0; }
+        };
+
+        struct lambda_init
+        {
+        };
+
+        struct lambda
+        {
+            lambda(const lambda_init& init) {}
+            lambda(const lambda& rhs) {}
+
+            template< class T1 >
+            bool operator()(T1) const { return false; }
+
+        private:
+            lambda() {}
+            lambda& operator=(const lambda& rhs) { return *this; }
         };
 
         template< class Container, class Pred >
@@ -85,32 +103,75 @@ namespace boost
                                            test_result2.end() );
         }
 
+        template< class Rng >
+        void check_copy_assign(Rng r)
+        {
+            Rng r2 = r;
+            r2 = r;
+        }
+
         template< class Container, class Pred >
+        void filtered_range_copy_assign(Container& c, Pred pred)
+        {
+            using namespace boost::adaptors;
+            check_copy_assign(c | filtered(pred));
+            check_copy_assign(adaptors::filter(c, pred));
+        }
+
+        template< class Container, class Pred, class PredInit >
         void filtered_test_impl()
         {
             using namespace boost::assign;
 
             Container c;
+            PredInit init;
+            Pred pred(init);
 
             // test empty container
-            filtered_test_impl(c, Pred());
+            filtered_test_impl(c, pred);
 
             // test one element
             c += 1;
-            filtered_test_impl(c, Pred());
+            filtered_test_impl(c, pred);
 
             // test many elements
             c += 1,2,2,2,3,4,4,4,4,5,6,7,8,9,9;
-            filtered_test_impl(c, Pred());
+            filtered_test_impl(c, pred);
+
+            // test the range and iterator are copy assignable
+            filtered_range_copy_assign(c, pred);
         }
 
         template< class Container >
         void filtered_test_all_predicates()
         {
-            filtered_test_impl< Container, always_false_pred >();
-            filtered_test_impl< Container, always_true_pred >();
-            filtered_test_impl< Container, is_odd >();
-            filtered_test_impl< Container, is_even >();
+            filtered_test_impl< Container, always_false_pred, always_false_pred >();
+            filtered_test_impl< Container, always_true_pred, always_true_pred >();
+            filtered_test_impl< Container, is_odd, is_odd >();
+            filtered_test_impl< Container, is_even, is_even >();
+            filtered_test_impl< Container, lambda, lambda_init >();
+        }
+
+        void ticket_10988_single_pass()
+        {
+            std::vector<int> v;
+            std::string str("0 1 2 3 4 5");
+            std::istringstream in(str);
+
+            boost::push_back(v,
+                boost::make_iterator_range(
+                    std::istream_iterator<int>(in),
+                    std::istream_iterator<int>())
+                | boost::adaptors::filtered(is_even()));
+
+            std::vector<int> reference;
+            for (int i = 0; i < 6; i += 2)
+            {
+                reference.push_back(i);
+            }
+            BOOST_CHECK_EQUAL_COLLECTIONS(
+                reference.begin(), reference.end(),
+                v.begin(), v.end());
         }
 
         void filtered_test()
@@ -119,6 +180,7 @@ namespace boost
             filtered_test_all_predicates< std::list< int > >();
             filtered_test_all_predicates< std::set< int > >();
             filtered_test_all_predicates< std::multiset< int > >();
+            ticket_10988_single_pass();
         }
     }
 }

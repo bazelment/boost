@@ -74,32 +74,48 @@ SOURCES =
     stl_port
     text_iarchive
     text_oarchive
+    polymorphic_text_iarchive
+    polymorphic_text_oarchive
+    polymorphic_binary_iarchive
+    polymorphic_binary_oarchive
+    polymorphic_xml_iarchive
+    polymorphic_xml_oarchive
     void_cast
     archive_exception
     xml_grammar
     xml_iarchive
     xml_oarchive
     xml_archive_exception
-;
+    codecvt_null
+    utf8_codecvt_facet
+ ;
     
 WSOURCES = 
     basic_text_wiprimitive
     basic_text_woprimitive
     text_wiarchive
     text_woarchive
-    utf8_codecvt_facet
+    polymorphic_text_wiarchive
+    polymorphic_text_woarchive
     xml_wgrammar
     xml_wiarchive
     xml_woarchive
-    codecvt_null
+    polymorphic_xml_wiarchive
+    polymorphic_xml_woarchive
 ;
-
 
 lib boost_serialization 
     : $(SOURCES).cpp
     : 
     <toolset>msvc:<cxxflags>/Gy
-    #<toolset>gcc:<cxxflags>"-fvisibility=hidden"
+    <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
+    <toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
+    <toolset>clang:<cxxflags>"-fvisibility=hidden -fvisibility-inlines-hidden"
+    <toolset>gcc:<cxxflags>"-fvisibility=hidden -fvisibility-inlines-hidden"
+    <toolset>darwin:<cxxflags>"-fvisibility=hidden -fvisibility-inlines-hidden"
+    <toolset>gcc:<cxxflags>"-ftemplate-depth-255"
+    <toolset>clang:<cxxflags>"-ftemplate-depth-255"
+    <toolset>darwin:<cxxflags>"-ftemplate-depth-255"
     <link>shared:<define>BOOST_SERIALIZATION_DYN_LINK=1
     ;
 
@@ -107,7 +123,16 @@ lib boost_wserialization
     : $(WSOURCES).cpp boost_serialization 
     :     
     <toolset>msvc:<cxxflags>/Gy 
-    #<toolset>gcc:<cxxflags>"-fvisibility=hidden"
+    <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
+    <toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
+    <toolset>clang:<cxxflags>"-fvisibility=hidden -fvisibility-inlines-hidden"
+    <toolset>gcc:<cxxflags>"-fvisibility=hidden -fvisibility-inlines-hidden"
+    <toolset>darwin:<cxxflags>"-fvisibility=hidden -fvisibility-inlines-hidden"
+    <toolset>gcc:<cxxflags>"-ftemplate-depth-255"
+    <toolset>clang:<cxxflags>"-ftemplate-depth-255"
+    <toolset>darwin:<cxxflags>"-ftemplate-depth-255"
+    # note: both serialization and wserialization are conditioned on the this
+    # switch - don't change it to BOOST_WSERIALIZATION_DYN_LINK
     <link>shared:<define>BOOST_SERIALIZATION_DYN_LINK=1
     ;
 

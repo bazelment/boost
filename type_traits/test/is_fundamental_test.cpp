@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/is_fundamental.hpp>
 #endif
+#include "test.hpp"
+#include "check_integral_constant.hpp"
 
 TT_TEST_BEGIN(is_fundamental)
 
@@ -153,6 +153,15 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_fundamental<char16_t>::value, true);
 #endif
 #ifndef BOOST_NO_CXX11_CHAR32_T
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_fundamental<char32_t>::value, true);
+#endif
+
+#ifdef BOOST_HAS_INT128
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_fundamental<boost::int128_type>::value, true);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_fundamental<boost::uint128_type>::value, true);
+#endif
+
+#ifdef BOOST_HAS_FLOAT128
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_fundamental<boost::float128_type>::value, true);
 #endif
 
 TT_TEST_END

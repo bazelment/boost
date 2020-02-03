@@ -15,7 +15,8 @@ main()
 
   // get a month and a year from the user
   try {
-    int y, m;
+    greg_year::value_type y;
+    greg_month::value_type m;
     std::cout << "   Enter Year(ex: 2002): ";
     std::cin >> y;
     year = greg_year(y);
@@ -23,11 +24,11 @@ main()
     std::cin >> m;
     month = greg_month(m);
   }
-  catch(bad_year by) {
+  catch(const bad_year& by) {
     std::cout << "Invalid Year Entered: " << by.what() << '\n'
       << "Using minimum values for month and year." << std::endl;
   }
-  catch(bad_month bm) {
+  catch(const bad_month& bm) {
     std::cout << "Invalid Month Entered" << bm.what() << '\n'
       << "Using minimum value for month. " << std::endl;
   }

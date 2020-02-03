@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/has_trivial_copy.hpp>
 #endif
+#include "test.hpp"
+#include "check_integral_constant.hpp"
 
 #ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
 
@@ -24,6 +24,13 @@ public:
 };
 
 #endif
+
+struct private_copy
+{
+   private_copy();
+private:
+   private_copy(const private_copy&);
+};
 
 TT_TEST_BEGIN(has_trivial_copy)
 
@@ -194,9 +201,10 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int&>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int&&>::value, false);
 #endif
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<const int&>::value, false);
-BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int[2]>::value, true);
-BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int[3][2]>::value, true);
-BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int[2][4][5][6][3]>::value, true);
+// Arrays can not be explicitly copied:
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int[2]>::value, false);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int[3][2]>::value, false);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<int[2][4][5][6][3]>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<UDT>::value, false);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<void>::value, false);
 // cases we would like to succeed but can't implement in the language:
@@ -219,6 +227,7 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<test_abc1>::value, false);
 #ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<bug_10389>::value, false);
 #endif
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::has_trivial_copy<private_copy>::value, false);
 
 TT_TEST_END
 

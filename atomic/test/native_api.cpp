@@ -8,7 +8,6 @@
 
 #include <boost/config.hpp>
 #include <boost/cstdint.hpp>
-#include <boost/core/lightweight_test.hpp>
 
 #include "api_test_helpers.hpp"
 
@@ -46,6 +45,15 @@ int main(int, char *[])
     test_constexpr_ctor<long>();
     test_constexpr_ctor<int*>();
 
+#if !defined(BOOST_ATOMIC_NO_FLOATING_POINT)
+    test_floating_point_api<float>();
+    test_floating_point_api<double>();
+    test_floating_point_api<long double>();
+#if (defined(BOOST_HAS_INT128) || !defined(BOOST_NO_ALIGNMENT)) && defined(BOOST_HAS_FLOAT128)
+    test_floating_point_api<boost::float128_type>();
+#endif
+#endif
+
     test_pointer_api<int>();
 
     test_enum_api();
@@ -57,6 +65,9 @@ int main(int, char *[])
 #if defined(BOOST_HAS_INT128)
     test_struct_api<test_struct<boost::uint128_type> >();
 #endif
+
+    // https://svn.boost.org/trac/boost/ticket/10994
+    test_struct_x2_api<test_struct_x2<boost::uint64_t> >();
 
     // https://svn.boost.org/trac/boost/ticket/9985
     test_struct_api<test_struct<double> >();

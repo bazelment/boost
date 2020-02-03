@@ -176,7 +176,20 @@ class list_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
-   explicit list_impl(const value_traits &v_traits = value_traits())
+   list_impl()
+      :  data_(value_traits())
+   {
+      this->priv_size_traits().set_size(size_type(0));
+      node_algorithms::init_header(this->get_root_node());
+   }
+
+   //! <b>Effects</b>: constructs an empty list.
+   //!
+   //! <b>Complexity</b>: Constant
+   //!
+   //! <b>Throws</b>: If value_traits::node_traits::node
+   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
+   explicit list_impl(const value_traits &v_traits)
       :  data_(v_traits)
    {
       this->priv_size_traits().set_size(size_type(0));
@@ -202,8 +215,15 @@ class list_impl
       this->insert(this->cend(), b, e);
    }
 
-   //! <b>Effects</b>: to-do
+   //! <b>Effects</b>: Constructs a container moving resources from another container.
+   //!   Internal value traits are move constructed and
+   //!   nodes belonging to x (except the node representing the "end") are linked to *this.
    //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: If value_traits::node_traits::node's
+   //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
+   //!   or the move constructor of value traits throws.
    list_impl(BOOST_RV_REF(list_impl) x)
       : data_(::boost::move(x.priv_value_traits()))
    {
@@ -213,7 +233,7 @@ class list_impl
       this->swap(x);
    }
 
-   //! <b>Effects</b>: to-do
+   //! <b>Effects</b>: Equivalent to swap
    //!
    list_impl& operator=(BOOST_RV_REF(list_impl) x)
    {  this->swap(x); return *this;  }
@@ -248,8 +268,7 @@ class list_impl
    void push_back(reference value)
    {
       node_ptr to_insert = priv_value_traits().to_node_ptr(value);
-      if(safemode_or_autounlink)
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(this->get_root_node(), to_insert);
       this->priv_size_traits().increment();
    }
@@ -267,8 +286,7 @@ class list_impl
    void push_front(reference value)
    {
       node_ptr to_insert = priv_value_traits().to_node_ptr(value);
-      if(safemode_or_autounlink)
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(node_traits::get_next(this->get_root_node()), to_insert);
       this->priv_size_traits().increment();
    }
@@ -531,11 +549,7 @@ class list_impl
    void swap(list_impl& other)
    {
       node_algorithms::swap_nodes(this->get_root_node(), other.get_root_node());
-      if(constant_time_size){
-         size_type backup = this->priv_size_traits().get_size();
-         this->priv_size_traits().set_size(other.priv_size_traits().get_size());
-         other.priv_size_traits().set_size(backup);
-      }
+      this->priv_size_traits().swap(other.priv_size_traits());
    }
 
    //! <b>Effects</b>: Moves backwards all the elements, so that the first
@@ -770,6 +784,33 @@ class list_impl
       rollback.release();
    }
 
+   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //!   Cloner should yield to nodes equivalent to the original nodes.
+   //!
+   //! <b>Effects</b>: Erases all the elements from *this
+   //!   calling Disposer::operator()(pointer), clones all the
+   //!   elements from src calling Cloner::operator()(reference)
+   //!   and inserts them on *this.
+   //!
+   //!   If cloner throws, all cloned elements are unlinked and disposed
+   //!   calling Disposer::operator()(pointer).
+   //!
+   //! <b>Complexity</b>: Linear to erased plus inserted elements.
+   //!
+   //! <b>Throws</b>: If cloner throws. Basic guarantee.
+   template <class Cloner, class Disposer>
+   void clone_from(BOOST_RV_REF(list_impl) src, Cloner cloner, Disposer disposer)
+   {
+      this->clear_and_dispose(disposer);
+      detail::exception_disposer<list_impl, Disposer>
+         rollback(*this, disposer);
+      iterator b(src.begin()), e(src.end());
+      for(; b != e; ++b){
+         this->push_back(*cloner(*b));
+      }
+      rollback.release();
+   }
+
    //! <b>Requires</b>: value must be an lvalue and p must be a valid iterator of *this.
    //!
    //! <b>Effects</b>: Inserts the value before the position pointed by p.
@@ -784,8 +825,7 @@ class list_impl
    iterator insert(const_iterator p, reference value)
    {
       node_ptr to_insert = this->priv_value_traits().to_node_ptr(value);
-      if(safemode_or_autounlink)
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(p.pointed_node(), to_insert);
       this->priv_size_traits().increment();
       return iterator(to_insert, this->priv_value_traits_ptr());
@@ -1320,6 +1360,32 @@ class list_impl
          BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == node_count);
    }
 
+   friend bool operator==(const list_impl &x, const list_impl &y)
+   {
+      if(constant_time_size && x.size() != y.size()){
+         return false;
+      }
+      return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
+   }
+
+   friend bool operator!=(const list_impl &x, const list_impl &y)
+   {  return !(x == y); }
+
+   friend bool operator<(const list_impl &x, const list_impl &y)
+   {  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+
+   friend bool operator>(const list_impl &x, const list_impl &y)
+   {  return y < x;  }
+
+   friend bool operator<=(const list_impl &x, const list_impl &y)
+   {  return !(y < x);  }
+
+   friend bool operator>=(const list_impl &x, const list_impl &y)
+   {  return !(x < y);  }
+
+   friend void swap(list_impl &x, list_impl &y)
+   {  x.swap(y);  }
+
    /// @cond
 
    private:
@@ -1338,103 +1404,6 @@ class list_impl
    /// @endcond
 };
 
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-inline bool operator<
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
-#else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-bool operator==
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
-#else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{
-   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> list_type;
-   const bool C = list_type::constant_time_size;
-   if(C && x.size() != y.size()){
-      return false;
-   }
-   return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
-}
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-inline bool operator!=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
-#else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{  return !(x == y); }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-inline bool operator>
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
-#else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{  return y < x;  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-inline bool operator<=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
-#else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{  return !(y < x);  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-inline bool operator>=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
-#else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{  return !(x < y);  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
-#endif
-inline void swap
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(list_impl<T, Options...> &x, list_impl<T, Options...> &y)
-#else
-(list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
-#endif
-{  x.swap(y);  }
 
 //! Helper metafunction to define a \c list that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.
@@ -1502,26 +1471,38 @@ class list
    typedef typename Base::iterator              iterator;
    typedef typename Base::const_iterator        const_iterator;
 
-   explicit list(const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE list()
+      :  Base()
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE explicit list(const value_traits &v_traits)
       :  Base(v_traits)
    {}
 
    template<class Iterator>
-   list(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE list(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
       :  Base(b, e, v_traits)
    {}
 
-   list(BOOST_RV_REF(list) x)
+   BOOST_INTRUSIVE_FORCEINLINE list(BOOST_RV_REF(list) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   list& operator=(BOOST_RV_REF(list) x)
+   BOOST_INTRUSIVE_FORCEINLINE list& operator=(BOOST_RV_REF(list) x)
    {  return static_cast<list &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
-   static list &container_from_end_iterator(iterator end_iterator)
+   template <class Cloner, class Disposer>
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const list &src, Cloner cloner, Disposer disposer)
+   {  Base::clone_from(src, cloner, disposer);  }
+
+   template <class Cloner, class Disposer>
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(list) src, Cloner cloner, Disposer disposer)
+   {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static list &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<list &>(Base::container_from_end_iterator(end_iterator));   }
 
-   static const list &container_from_end_iterator(const_iterator end_iterator)
+   BOOST_INTRUSIVE_FORCEINLINE static const list &container_from_end_iterator(const_iterator end_iterator)
    {  return static_cast<const list &>(Base::container_from_end_iterator(end_iterator));   }
 };
 

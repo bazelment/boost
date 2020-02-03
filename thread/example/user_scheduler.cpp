@@ -5,7 +5,7 @@
 
 #include <boost/config.hpp>
 
-#define BOOST_THREAD_VERSION 4
+#define BOOST_THREAD_VERSION 5
 //#define BOOST_THREAD_USES_LOG
 #define BOOST_THREAD_USES_LOG_THREAD_ID
 #if ! defined  BOOST_NO_CXX11_DECLTYPE
@@ -16,6 +16,10 @@
 #include <boost/assert.hpp>
 #include <boost/thread/thread_only.hpp>
 #include <string>
+
+#ifdef BOOST_MSVC
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
 
 void p1()
 {

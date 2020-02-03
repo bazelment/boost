@@ -4,13 +4,13 @@
 //  Boost Software License, Version 1.0. (See accompanying file 
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "test.hpp"
-#include "check_integral_constant.hpp"
 #ifdef TEST_STD
 #  include <type_traits>
 #else
 #  include <boost/type_traits/is_floating_point.hpp>
 #endif
+#include "test.hpp"
+#include "check_integral_constant.hpp"
 
 TT_TEST_BEGIN(is_floating_point)
 
@@ -28,6 +28,13 @@ BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<long double>::value, true)
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<long double const>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<long double volatile>::value, true);
 BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<long double const volatile>::value, true);
+
+#ifdef BOOST_HAS_FLOAT128
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<__float128>::value, true);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<const __float128>::value, true);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<volatile __float128>::value, true);
+BOOST_CHECK_INTEGRAL_CONSTANT(::tt::is_floating_point<const volatile __float128>::value, true);
+#endif
 
 //
 // cases that should not be true:

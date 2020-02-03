@@ -1,23 +1,21 @@
 /*
- (c) 2014 Glen Joseph Fernandes
- glenjofe at gmail dot com
+Copyright 2014-2015 Glen Joseph Fernandes
+(glenjofe@gmail.com)
 
- Distributed under the Boost Software
- License, Version 1.0.
- http://boost.org/LICENSE_1_0.txt
+Distributed under the Boost Software License, Version 1.0.
+(http://www.boost.org/LICENSE_1_0.txt)
 */
 #include <boost/align/align.hpp>
 #include <boost/align/is_aligned.hpp>
 #include <boost/core/lightweight_test.hpp>
-#include <cstddef>
 
 template<std::size_t Alignment>
 void test()
 {
-    char s[Alignment + Alignment];
+    char s[Alignment << 1];
     char* b = s;
-    while (!boost::alignment::is_aligned(Alignment, b)) {
-        b++;
+    while (!boost::alignment::is_aligned(b, Alignment)) {
+        ++b;
     }
     {
         std::size_t n = Alignment;
@@ -25,8 +23,16 @@ void test()
         void* q = boost::alignment::align(Alignment, 1, p, n);
         BOOST_TEST(q == p);
         BOOST_TEST(q == b);
-        BOOST_TEST(boost::alignment::is_aligned(Alignment, q));
+        BOOST_TEST(boost::alignment::is_aligned(q, Alignment));
         BOOST_TEST(n == Alignment);
+    }
+    {
+        std::size_t n = 0;
+        void* p = b;
+        void* q = boost::alignment::align(Alignment, 1, p, n);
+        BOOST_TEST(q == 0);
+        BOOST_TEST(p == b);
+        BOOST_TEST(n == 0);
     }
     {
         std::size_t n = Alignment - 1;
@@ -42,7 +48,7 @@ void test()
         void* q = boost::alignment::align(Alignment, 1, p, n);
         BOOST_TEST(q == p);
         BOOST_TEST(p == &b[Alignment]);
-        BOOST_TEST(boost::alignment::is_aligned(Alignment, q));
+        BOOST_TEST(boost::alignment::is_aligned(q, Alignment));
         BOOST_TEST(n == 1);
     }
 }

@@ -24,7 +24,24 @@ BOOST_FUSION_DEFINE_STRUCT(
     (int, y)
 )
 
+// Tutorial (compile test only)
+BOOST_FUSION_DEFINE_STRUCT(
+    (demo), employee,
+    (std::string, name)
+    (int, age)
+)
+
 BOOST_FUSION_DEFINE_STRUCT(BOOST_PP_EMPTY(), s, (int, m))
+
+BOOST_FUSION_DEFINE_STRUCT(BOOST_PP_EMPTY(), empty_struct, )
+
+// Testing non-constexpr compatible types
+BOOST_FUSION_DEFINE_STRUCT(
+    (ns),
+    employee, 
+    (std::string, name)
+    (std::string, nickname)
+)
 
 int
 main()
@@ -37,6 +54,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<ns::point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<ns::point>::value);
         ns::point p(123, 456);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -56,9 +74,9 @@ main()
     }
 
     {
-        vector<int, float> v1(4, 2);
+        vector<int, float> v1(4, 2.f);
         ns::point v2(5, 3);
-        vector<long, double> v3(5, 4);
+        vector<long, double> v3(5, 4.0);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);
@@ -100,6 +118,13 @@ main()
         BOOST_TEST(p == make_vector(3,5));
     }
 
+    {
+        ns::employee emp = make_list("John Doe", "jdoe"); 
+        std::cout << at_c<0>(emp) << std::endl;
+        std::cout << at_c<1>(emp) << std::endl;
+
+        BOOST_TEST(emp == make_vector("John Doe", "jdoe"));
+    }
+
     return boost::report_errors();
 }
-

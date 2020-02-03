@@ -13,7 +13,6 @@
 
 #include <boost/config.hpp>
 #include <boost/cstdint.hpp>
-#include <boost/serialization/pfto.hpp>
 #include <boost/static_assert.hpp>
 
 #include <climits>
@@ -22,7 +21,7 @@
 #endif
 
 #include <boost/archive/basic_archive.hpp>
-#include <boost/detail/endian.hpp>
+#include <boost/predef/other/endian.h>
 
 enum portable_binary_archive_flags {
     endian_big        = 0x4000,

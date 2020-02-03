@@ -31,6 +31,8 @@ BOOST_FUSION_DEFINE_ASSOC_TPL_STRUCT(
     (int, y, ns::y_member)
 )
 
+BOOST_FUSION_DEFINE_ASSOC_TPL_STRUCT((M), BOOST_PP_EMPTY(), empty_struct, )
+
 int
 main()
 {
@@ -44,6 +46,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<point>::value);
         point p(123, 456);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -63,9 +66,9 @@ main()
     }
 
     {
-        vector<int, float> v1(4, 2);
+        vector<int, float> v1(4, 2.f);
         point v2(5, 3);
-        vector<long, double> v3(5, 4);
+        vector<long, double> v3(5, 4.0);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);

@@ -22,7 +22,7 @@ namespace std{
 #endif
 
 #include <boost/detail/workaround.hpp>
-#include <boost/detail/endian.hpp>
+#include <boost/predef/other/endian.h>
 
 #include <boost/archive/basic_binary_iarchive.hpp>
 
@@ -32,11 +32,11 @@ namespace archive {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // implementation of binary_binary_archive
 template<class Archive>
-BOOST_ARCHIVE_OR_WARCHIVE_DECL(void)
-basic_binary_iarchive<Archive>::load_override(class_name_type & t, int){
+BOOST_ARCHIVE_OR_WARCHIVE_DECL void
+basic_binary_iarchive<Archive>::load_override(class_name_type & t){
     std::string cn;
     cn.reserve(BOOST_SERIALIZATION_MAX_KEY_SIZE);
-    load_override(cn, 0);
+    load_override(cn);
     if(cn.size() > (BOOST_SERIALIZATION_MAX_KEY_SIZE - 1))
         boost::serialization::throw_exception(
             archive_exception(archive_exception::invalid_class_name)
@@ -47,8 +47,8 @@ basic_binary_iarchive<Archive>::load_override(class_name_type & t, int){
 }
 
 template<class Archive>
-BOOST_ARCHIVE_OR_WARCHIVE_DECL(void)
-basic_binary_iarchive<Archive>::init(){
+BOOST_ARCHIVE_OR_WARCHIVE_DECL void
+basic_binary_iarchive<Archive>::init(void){
     // read signature in an archive version independent manner
     std::string file_signature;
     
@@ -89,7 +89,7 @@ basic_binary_iarchive<Archive>::init(){
     {
         int v = 0;
         v = this->This()->m_sb.sbumpc();
-        #if defined(BOOST_LITTLE_ENDIAN)
+        #if BOOST_ENDIAN_LITTLE_BYTE
         if(v < 6){
             ;
         }
@@ -111,7 +111,7 @@ basic_binary_iarchive<Archive>::init(){
             // version 8+ followed by a zero
             this->This()->m_sb.sbumpc();
         }
-        #elif defined(BOOST_BIG_ENDIAN)
+        #elif BOOST_ENDIAN_BIG_BYTE
         if(v == 0)
             v = this->This()->m_sb.sbumpc();
         #endif

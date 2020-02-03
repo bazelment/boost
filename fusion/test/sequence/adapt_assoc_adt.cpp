@@ -65,10 +65,13 @@ BOOST_FUSION_ADAPT_ASSOC_ADT(
     ns::point,
     (int, int, obj.get_x(), obj.set_x(val), ns::x_member)
     (int, int, obj.get_y(), obj.set_y(val), ns::y_member)
-    (BOOST_FUSION_ADAPT_AUTO, BOOST_FUSION_ADAPT_AUTO, obj.get_z(), obj.set_z(val), ns::z_member)
+    (auto, auto, obj.get_z(), obj.set_z(val), ns::z_member)
 )
 
 #endif
+
+class empty_adt{};
+BOOST_FUSION_ADAPT_ASSOC_ADT(empty_adt,)
 
 int
 main()
@@ -81,6 +84,7 @@ main()
 
     {
         BOOST_MPL_ASSERT_NOT((traits::is_view<ns::point>));
+        BOOST_STATIC_ASSERT(!traits::is_view<ns::point>::value);
         ns::point p(123, 456, 789);
 
         std::cout << at_c<0>(p) << std::endl;
@@ -102,9 +106,9 @@ main()
     }
 
     {
-        boost::fusion::vector<int, float, int> v1(4, 2, 2);
+        boost::fusion::vector<int, float, int> v1(4, 2.f, 2);
         ns::point v2(5, 3, 3);
-        boost::fusion::vector<long, double, int> v3(5, 4, 4);
+        boost::fusion::vector<long, double, int> v3(5, 4., 4);
         BOOST_TEST(v1 < v2);
         BOOST_TEST(v1 <= v2);
         BOOST_TEST(v2 > v1);

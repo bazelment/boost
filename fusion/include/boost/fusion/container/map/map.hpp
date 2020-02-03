@@ -35,6 +35,8 @@
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/support/sequence_base.hpp>
 #include <boost/fusion/support/category_of.hpp>
+#include <boost/fusion/support/void.hpp>
+#include <boost/fusion/support/detail/enabler.hpp>
 
 #include <boost/utility/enable_if.hpp>
 
@@ -65,24 +67,21 @@ namespace boost { namespace fusion
           : base_type(std::forward<map>(seq))
         {}
 
-        template <typename Sequence>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        map(Sequence const& seq
-          , typename enable_if<traits::is_sequence<Sequence>>::type* /*dummy*/ = 0)
+        template <typename Sequence, typename = typename enable_if<traits::is_sequence<Sequence>>::type>
+        BOOST_FUSION_GPU_ENABLED
+        map(Sequence const& seq)
           : base_type(begin(seq), detail::map_impl_from_iterator())
         {}
 
-        template <typename Sequence>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        map(Sequence& seq
-          , typename enable_if<traits::is_sequence<Sequence>>::type* /*dummy*/ = 0)
+        template <typename Sequence, typename = typename enable_if<traits::is_sequence<Sequence>>::type>
+        BOOST_FUSION_GPU_ENABLED
+        map(Sequence& seq)
           : base_type(begin(seq), detail::map_impl_from_iterator())
         {}
 
-        template <typename Sequence>
-        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
-        map(Sequence&& seq
-          , typename enable_if<traits::is_sequence<Sequence>>::type* /*dummy*/ = 0)
+        template <typename Sequence, typename = typename enable_if<traits::is_sequence<Sequence>>::type>
+        BOOST_FUSION_GPU_ENABLED
+        map(Sequence&& seq)
           : base_type(begin(seq), detail::map_impl_from_iterator())
         {}
 
@@ -93,7 +92,7 @@ namespace boost { namespace fusion
         {}
 
         template <typename First, typename ...T_>
-        BOOST_CXX14_CONSTEXPR BOOST_FUSION_GPU_ENABLED
+        BOOST_FUSION_GPU_ENABLED
         map(First&& first, T_&&... rest)
           : base_type(BOOST_FUSION_FWD_ELEM(First, first), BOOST_FUSION_FWD_ELEM(T_, rest)...)
         {}

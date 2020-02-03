@@ -9,13 +9,30 @@
 //  See http://www.boost.org for updates, documentation, and revision history.
 
 #include <boost/serialization/export.hpp>
+
 #include "polymorphic_base.hpp"
 
-BOOST_CLASS_EXPORT_IMPLEMENT(polymorphic_base)
+template<class Archive>
+POLYMORPHIC_BASE_DLL_DECL void polymorphic_base::serialize(
+    Archive &ar,
+    const unsigned int /* file_version */
+){}
 
-const char * polymorphic_base::get_key() const{
-    return
-        boost::serialization::type_info_implementation<
-            polymorphic_base
-        >::type::get_const_instance().get_key();
-}
+POLYMORPHIC_BASE_DLL_DECL
+polymorphic_base::polymorphic_base(){}
+POLYMORPHIC_BASE_DLL_DECL
+polymorphic_base::~polymorphic_base(){}
+
+#include <boost/archive/polymorphic_oarchive.hpp>
+#include <boost/archive/polymorphic_iarchive.hpp>
+
+template
+POLYMORPHIC_BASE_DLL_DECL void polymorphic_base::serialize(
+    boost::archive::polymorphic_oarchive &,
+    const unsigned int /* file_version */
+);
+template POLYMORPHIC_BASE_DLL_DECL void polymorphic_base::serialize(
+    boost::archive::polymorphic_iarchive &,
+    const unsigned int
+);
+BOOST_CLASS_EXPORT_IMPLEMENT(polymorphic_base)

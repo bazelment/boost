@@ -8,6 +8,7 @@
 #define BOOST_THREAD_EXECUTORS_GENERIC_EXECUTOR_REF_HPP
 
 #include <boost/thread/detail/config.hpp>
+#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION && defined BOOST_THREAD_PROVIDES_EXECUTORS && defined BOOST_THREAD_USES_MOVE
 
 #include <boost/thread/detail/delete.hpp>
 #include <boost/thread/detail/move.hpp>
@@ -32,7 +33,7 @@ namespace boost
 
     /// executor is not copyable.
     BOOST_THREAD_NO_COPYABLE(executor_ref)
-    executor_ref(Executor& ex) : ex(ex) {}
+    executor_ref(Executor& ex_) : ex(ex_) {}
 
     /**
      * \par Effects
@@ -41,7 +42,7 @@ namespace boost
      * \par Synchronization
      * The completion of all the closures happen before the completion of the executor destructor.
      */
-    ~executor_ref() {};
+    ~executor_ref() {}
 
     /**
      * \par Effects
@@ -98,9 +99,9 @@ namespace boost
     typedef executors::work work;
 
     template<typename Executor>
-    generic_executor_ref(Executor& ex)
-    //: ex(make_shared<executor_ref<Executor> >(ex)) // todo check why this doesn't works with C++03
-    : ex( new executor_ref<Executor>(ex) )
+    generic_executor_ref(Executor& ex_)
+    //: ex(make_shared<executor_ref<Executor> >(ex_)) // todo check why this doesn't works with C++03
+    : ex( new executor_ref<Executor>(ex_) )
     {
     }
 
@@ -121,11 +122,6 @@ namespace boost
      */
     bool closed() { return ex->closed(); }
 
-    void submit(BOOST_THREAD_RV_REF(work) closure)
-    {
-      ex->submit(boost::forward<work>(closure));
-    }
-
     /**
      * \par Requires
      * \c Closure is a model of Callable(void()) and a model of CopyConstructible/MoveConstructible.
@@ -142,24 +138,31 @@ namespace boost
      * Whatever exception that can be throw while storing the closure.
      */
 
+    void submit(BOOST_THREAD_RV_REF(work) closure)
+    {
+      ex->submit(boost::move(closure));
+    }
+
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
     template <typename Closure>
     void submit(Closure & closure)
     {
-      work w ((closure));
-      submit(boost::move(w));
+      //work w ((closure));
+      //submit(boost::move(w));
+      submit(work(closure));
     }
 #endif
     void submit(void (*closure)())
     {
       work w ((closure));
       submit(boost::move(w));
+      //submit(work(closure));
     }
 
     template <typename Closure>
-    void submit(BOOST_THREAD_RV_REF(Closure) closure)
+    void submit(BOOST_THREAD_FWD_REF(Closure) closure)
     {
-      work w = boost::move(closure);
+      work w((boost::forward<Closure>(closure)));
       submit(boost::move(w));
     }
 
@@ -208,4 +211,5 @@ namespace boost
 
 #include <boost/config/abi_suffix.hpp>
 
+#endif
 #endif

@@ -1,5 +1,5 @@
 [/
-  (C) Copyright 20012 Vicente J. Botet Escriba.
+  (C) Copyright 2012-2015 Vicente J. Botet Escriba.
   Distributed under the Boost Software License, Version 1.0.
   (See accompanying file LICENSE_1_0.txt or copy at
   http://www.boost.org/LICENSE_1_0.txt).
@@ -10,36 +10,37 @@
 
 
 [table Default Values for Configurable Features
-    [[Feature]                  [Anti-Feature]               [V2]  [V3]  [V4]  ]
-    [[USES_CHRONO]              [DONT_USE_CHRONO]            [YES/NO] [YES/NO] [YES/NO] ]
-    [[PROVIDES_INTERRUPTIONS]   [DONT_PROVIDE_INTERRUPTIONS] [YES] [YES] [YES]  ]
-    [[THROW_IF_PRECONDITION_NOT_SATISFIED]   [-] [NO] [NO] [NO]  ]
+    [[Feature]                  [Anti-Feature]               [V2]  [V3]  [V4] [V5] ]
+    [[USES_CHRONO]              [DONT_USE_CHRONO]            [YES/NO] [YES/NO] [YES/NO] [YES/NO] ]
+    [[PROVIDES_INTERRUPTIONS]   [DONT_PROVIDE_INTERRUPTIONS] [YES] [YES] [YES] [YES] ]
+    [[THROW_IF_PRECONDITION_NOT_SATISFIED]   [-] [NO] [NO] [NO] [NO] ]
 
 
 
-    [[PROVIDES_PROMISE_LAZY]    [DONT_PROVIDE_PROMISE_LAZY]  [YES] [NO] [NO]  ]
+    [[PROVIDES_PROMISE_LAZY]    [DONT_PROVIDE_PROMISE_LAZY]  [YES] [NO] [NO] [NO] ]
 
-    [[PROVIDES_BASIC_THREAD_ID] [DONT_PROVIDE_BASIC_THREAD_ID]   [NO]  [YES] [YES] ]
-    [[PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN] [DONT_PROVIDE_GENERIC_SHARED_MUTEX_ON_WIN]   [NO]  [YES] [YES] ]
+    [[PROVIDES_BASIC_THREAD_ID] [DONT_PROVIDE_BASIC_THREAD_ID]   [NO]  [YES] [YES] [YES] ]
+    [[PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN] [DONT_PROVIDE_GENERIC_SHARED_MUTEX_ON_WIN]   [NO]  [YES] [YES] [YES] ]
 
-    [[PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSION]    [DONT_PROVIDE_SHARED_MUTEX_UPWARDS_CONVERSION]  [NO] [YES] [YES]  ]
-    [[PROVIDES_EXPLICIT_LOCK_CONVERSION]    [DONT_PROVIDE_EXPLICIT_LOCK_CONVERSION]  [NO] [YES] [YES]  ]
-    [[PROVIDES_FUTURE]    [DONT_PROVIDE_FUTURE]  [NO] [YES] [YES]  ]
-    [[PROVIDES_FUTURE_CTOR_ALLOCATORS]    [DONT_PROVIDE_FUTURE_CTOR_ALLOCATORS]  [NO] [YES] [YES]  ]
-    [[PROVIDES_THREAD_DESTRUCTOR_CALLS_TERMINATE_IF_JOINABLE]    [DONT_PROVIDE_THREAD_DESTRUCTOR_CALLS_TERMINATE_IF_JOINABLE]  [NO] [YES] [YES]  ]
-    [[PROVIDES_THREAD_MOVE_ASSIGN_CALLS_TERMINATE_IF_JOINABLE]    [DONT_PROVIDE_THREAD_MOVE_ASSIGN_CALLS_TERMINATE_IF_JOINABLE]  [NO] [YES] [YES]  ]
-    [[PROVIDES_ONCE_CXX11]    [DONT_PROVIDE_ONCE_CXX11]  [NO] [YES] [YES]  ]
-    [[USES_MOVE]                [DONT_USE_MOVE]              [NO] [YES] [YES] ]
+    [[PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSION]    [DONT_PROVIDE_SHARED_MUTEX_UPWARDS_CONVERSION]  [NO] [YES] [YES] [YES]  ]
+    [[PROVIDES_EXECUTORS]    [-]  [NO] [NO] [NO] [YES] ]
+    [[PROVIDES_EXPLICIT_LOCK_CONVERSION]    [DONT_PROVIDE_EXPLICIT_LOCK_CONVERSION]  [NO] [YES] [YES] [YES]  ]
+    [[PROVIDES_FUTURE]    [DONT_PROVIDE_FUTURE]  [NO] [YES] [YES] [YES]  ]
+    [[PROVIDES_FUTURE_CTOR_ALLOCATORS]    [DONT_PROVIDE_FUTURE_CTOR_ALLOCATORS]  [NO] [YES] [YES]  [YES]  ]
+    [[PROVIDES_THREAD_DESTRUCTOR_CALLS_TERMINATE_IF_JOINABLE]    [DONT_PROVIDE_THREAD_DESTRUCTOR_CALLS_TERMINATE_IF_JOINABLE]  [NO] [YES] [YES] [YES]  ]
+    [[PROVIDES_THREAD_MOVE_ASSIGN_CALLS_TERMINATE_IF_JOINABLE]    [DONT_PROVIDE_THREAD_MOVE_ASSIGN_CALLS_TERMINATE_IF_JOINABLE]  [NO] [YES] [YES] [YES]  ]
+    [[PROVIDES_ONCE_CXX11]    [DONT_PROVIDE_ONCE_CXX11]  [NO] [YES] [YES] [YES]  ]
+    [[USES_MOVE]                [DONT_USE_MOVE]              [NO] [YES] [YES] [YES] ]
 
-    [[USES_DATETIME]            [DONT_USE_DATETIME]          [YES/NO] [YES/NO] [YES/NO]  ]
-    [[PROVIDES_THREAD_EQ]       [DONT_PROVIDE_THREAD_EQ]     [YES] [YES] [NO]  ]
-    [[PROVIDES_CONDITION]       [DONT_PROVIDE_CONDITION]     [YES] [YES] [NO]  ]
-    [[PROVIDES_NESTED_LOCKS]    [DONT_PROVIDE_NESTED_LOCKS]  [YES] [YES] [NO]  ]
-    [[PROVIDES_SIGNATURE_PACKAGED_TASK]    [DONT_PROVIDE_SIGNATURE_PACKAGED_TASK]  [NO] [NO] [YES]  ]
-    [[PROVIDES_FUTURE_INVALID_AFTER_GET]    [DONT_PROVIDE_FUTURE_INVALID_AFTER_GET]  [NO] [NO] [YES]  ]
-   [/ [[PROVIDES_FUTURE_CONTINUATION]    [DONT_PROVIDE_FUTURE_CONTINUATION]  [NO] [NO] [YES]  ] ]
+    [[USES_DATETIME]            [DONT_USE_DATETIME]          [YES/NO] [YES/NO] [YES/NO]  [YES/NO] ]
+    [[PROVIDES_THREAD_EQ]       [DONT_PROVIDE_THREAD_EQ]     [YES] [YES] [NO] [NO]  ]
+    [[PROVIDES_CONDITION]       [DONT_PROVIDE_CONDITION]     [YES] [YES] [NO] [NO]  ]
+    [[PROVIDES_NESTED_LOCKS]    [DONT_PROVIDE_NESTED_LOCKS]  [YES] [YES] [NO]  [NO]  ]
+    [[PROVIDES_SIGNATURE_PACKAGED_TASK]    [DONT_PROVIDE_SIGNATURE_PACKAGED_TASK]  [NO] [NO] [YES] [YES]  ]
+    [[PROVIDES_FUTURE_INVALID_AFTER_GET]    [DONT_PROVIDE_FUTURE_INVALID_AFTER_GET]  [NO] [NO] [YES] [YES]  ]
+   [/ [[PROVIDES_FUTURE_CONTINUATION]    [DONT_PROVIDE_FUTURE_CONTINUATION]  [NO] [NO] [YES] [YES]  ] ]
 
-    [[PROVIDES_VARIADIC_THREAD]    [DONT_PROVIDE_VARIADIC_THREAD]  [NO] [NO] [C++11]  ]
+    [[PROVIDES_VARIADIC_THREAD]    [DONT_PROVIDE_VARIADIC_THREAD]  [NO] [NO] [C++11] [C++11] ]
 
 ]
 
@@ -80,7 +81,7 @@ When `BOOST_THREAD_VERSION>3`  && defined BOOST_THREAD_PLATFORM_PTHREAD define `
 
 [section:move  Boost.Atomic]
 
-Boost.Thread uses by default an Boost.Atomic in POSIX platforms to implement call_once..
+Boost.Thread uses by default Boost.Atomic in POSIX platforms to implement call_once..
 
 Define `BOOST_THREAD_USES_ATOMIC ` if you want to use Boost.Atomic.
 Define `BOOST_THREAD_DONT_USE_ATOMIC ` if you don't want to use Boost.Atomic or if it is not supported in your platform.
@@ -178,9 +179,9 @@ When `BOOST_THREAD_VERSION>=3` define `BOOST_THREAD_DONT_PROVIDE_GENERIC_SHARED_
 [section:shared_upwards Shared Locking Upwards Conversion]
 
 Boost.Threads includes in version 3 the Shared Locking Upwards Conversion as defined in [@http://home.roadrunner.com/~hinnant/bloomington/shared_mutex.html Shared Locking].
-These conversions need to be used carefully to avoid deadlock or livelock. The user need to define explicitly `BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSION` to get these upwards conversions. 
+These conversions need to be used carefully to avoid deadlock or livelock. The user need to define explicitly `BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSIONS` to get these upwards conversions. 
 
-When `BOOST_THREAD_VERSION==2` define `BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSION ` if you want these features.
+When `BOOST_THREAD_VERSION==2` define `BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSIONS ` if you want these features.
 When `BOOST_THREAD_VERSION>=3` define `BOOST_THREAD_DONT_PROVIDE_SHARED_MUTEX_UPWARDS_CONVERSION ` if you don't want these features.
 
 [endsect]
@@ -351,7 +352,7 @@ The user can request the version 3 by defining `BOOST_THREAD_VERSION` to 3. In t
 * Breaking change `BOOST_THREAD_PROVIDES_EXPLICIT_LOCK_CONVERSION `
 * Conformity & Breaking change `BOOST_THREAD_PROVIDES_FUTURE`
 * Uniformity `BOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN`
-* Extension `BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSION`
+* Extension `BOOST_THREAD_PROVIDES_SHARED_MUTEX_UPWARDS_CONVERSIONS`
 * Conformity `BOOST_THREAD_PROVIDES_FUTURE_CTOR_ALLOCATORS`
 * Conformity & Breaking change BOOST_THREAD_PROVIDES_THREAD_DESTRUCTOR_CALLS_TERMINATE_IF_JOINABLE
 * Conformity & Breaking change BOOST_THREAD_PROVIDES_THREAD_MOVE_ASSIGN_CALLS_TERMINATE_IF_JOINABLE

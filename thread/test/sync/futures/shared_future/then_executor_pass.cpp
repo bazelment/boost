@@ -23,6 +23,10 @@
 
 #if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 
+#ifdef BOOST_MSVC
+#pragma warning(disable: 4127) // conditional expression is constant
+#endif
+
 int p1()
 {
   BOOST_THREAD_LOG << "p1 < " << BOOST_THREAD_END_LOG;
@@ -102,6 +106,14 @@ int main()
     boost::basic_thread_pool ex(1);
     boost::future<int> f2 = boost::async(p1).share().then(ex, &p2);
     BOOST_TEST(f2.get()==2);
+  }
+  BOOST_THREAD_LOG << BOOST_THREAD_END_LOG;
+  {
+    boost::basic_thread_pool ex(1);
+    boost::shared_future<int> f1 = boost::async(p1).share();
+    boost::shared_future<int> f21 = f1.then(ex, &p2).share();
+    boost::future<int> f2= f21.then(ex, &p2);
+    BOOST_TEST(f2.get()==4);
   }
   BOOST_THREAD_LOG << BOOST_THREAD_END_LOG;
   {

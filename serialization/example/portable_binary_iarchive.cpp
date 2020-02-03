@@ -11,7 +11,7 @@
 #include <istream>
 #include <string>
 
-#include <boost/detail/endian.hpp>
+#include <boost/predef/other/endian.h>
 #include <boost/serialization/throw_exception.hpp>
 #include <boost/archive/archive_exception.hpp>
 
@@ -37,17 +37,17 @@ portable_binary_iarchive::load_impl(boost::intmax_t & l, char maxsize){
         );
 
     char * cptr = reinterpret_cast<char *>(& l);
-    #ifdef BOOST_BIG_ENDIAN
+    #if BOOST_ENDIAN_BIG_BYTE
         cptr += (sizeof(boost::intmax_t) - size);
     #endif
     this->primitive_base_t::load_binary(cptr, size);
 
-    #ifdef BOOST_BIG_ENDIAN
+    #if BOOST_ENDIAN_BIG_BYTE
         if(m_flags & endian_little)
     #else
         if(m_flags & endian_big)
     #endif
-            reverse_bytes(size, cptr);
+    reverse_bytes(size, cptr);
     
     if(negative)
         l = -l;
@@ -55,11 +55,11 @@ portable_binary_iarchive::load_impl(boost::intmax_t & l, char maxsize){
 
 void
 portable_binary_iarchive::load_override(
-    boost::archive::class_name_type & t, int
+    boost::archive::class_name_type & t
 ){
     std::string cn;
     cn.reserve(BOOST_SERIALIZATION_MAX_KEY_SIZE);
-    load_override(cn, 0);
+    load_override(cn);
     if(cn.size() > (BOOST_SERIALIZATION_MAX_KEY_SIZE - 1))
         boost::serialization::throw_exception(
             boost::archive::archive_exception(

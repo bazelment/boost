@@ -10,6 +10,7 @@
 #define BOOST_THREAD_EXECUTORS_EXECUTOR_ADAPTOR_HPP
 
 #include <boost/thread/detail/config.hpp>
+#if defined BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION && defined BOOST_THREAD_PROVIDES_EXECUTORS && defined BOOST_THREAD_USES_MOVE
 
 #include <boost/thread/executors/executor.hpp>
 
@@ -98,9 +99,6 @@ namespace executors
     void submit(BOOST_THREAD_RV_REF(work) closure)  {
       return ex.submit(boost::move(closure));
     }
-//    void submit(work & closure)  {
-//      return ex.submit(closure);
-//    }
 
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
     template <typename Closure>
@@ -115,9 +113,11 @@ namespace executors
     }
 
     template <typename Closure>
-    void submit(BOOST_THREAD_RV_REF(Closure) closure)
+    void submit(BOOST_THREAD_FWD_REF(Closure) closure)
     {
-      submit(work(boost::forward<Closure>(closure)));
+      //submit(work(boost::forward<Closure>(closure)));
+      work w((boost::forward<Closure>(closure)));
+      submit(boost::move(w));
     }
 
     /**
@@ -134,4 +134,5 @@ using executors::executor_adaptor;
 
 #include <boost/config/abi_suffix.hpp>
 
+#endif
 #endif

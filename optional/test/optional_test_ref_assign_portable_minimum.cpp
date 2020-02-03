@@ -38,7 +38,8 @@ void test_optional_ref_assignment()
 int main()
 {
   test_optional_ref_assignment<ScopeGuard>();
-  //test_optional_ref_assignment<Abstract>();
+  test_optional_ref_assignment<Abstract>();
+  test_optional_ref_assignment< optional<int> >();
   
   return boost::report_errors();
 }

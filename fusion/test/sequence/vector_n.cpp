@@ -94,7 +94,7 @@ main()
     }
 
     {
-        vector2<int, int> t1(123, 456);
+        vector2<int, short> t1(123, 456);
         vector2<double, float> t2(t1);
         (void)t2;
     }
@@ -136,7 +136,7 @@ main()
 
     {
         typedef vector7<bool, char, short, int, long, float, double> type;
-        type vec(false, 'x', 3, 4, 5, 6.0, 7.0);
+        type vec(false, 'x', 3, 4, 5, 6.f, 7.0);
 
         BOOST_TEST(at_c<0>(vec) == false);
         BOOST_TEST(at_c<1>(vec) == 'x');

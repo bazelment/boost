@@ -7,13 +7,9 @@
 
 //  Library home page: http://www.boost.org/libs/filesystem
 
-//--------------------------------------------------------------------------------------// 
+//--------------------------------------------------------------------------------------//
 
-// define BOOST_FILESYSTEM_SOURCE so that <boost/filesystem/config.hpp> knows
-// the library is being built (possibly exporting rather than importing code)
-#define BOOST_FILESYSTEM_SOURCE 
-
-#ifndef BOOST_SYSTEM_NO_DEPRECATED 
+#ifndef BOOST_SYSTEM_NO_DEPRECATED
 # define BOOST_SYSTEM_NO_DEPRECATED
 #endif
 
@@ -22,10 +18,15 @@
 
 # ifdef BOOST_POSIX_API
 #   include <fcntl.h>
+#   ifdef BOOST_HAS_UNISTD_H
+#      include <unistd.h>
+#   endif
 # else // BOOST_WINDOWS_API
 #   include <windows.h>
 #   include <wincrypt.h>
-#   pragma comment(lib, "Advapi32.lib")
+#   ifdef _MSC_VER
+#      pragma comment(lib, "Advapi32.lib")
+#   endif
 # endif
 
 namespace {
@@ -40,6 +41,33 @@ void fail(int err, boost::system::error_code* ec)
   ec->assign(err, boost::system::system_category());
   return;
 }
+
+#ifdef BOOST_WINDOWS_API
+
+int acquire_crypt_handle(HCRYPTPROV& handle)
+{
+  if (::CryptAcquireContextW(&handle, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return 0;
+
+  int errval = ::GetLastError();
+  if (errval != NTE_BAD_KEYSET)
+    return errval;
+
+  if (::CryptAcquireContextW(&handle, 0, 0, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return 0;
+
+  errval = ::GetLastError();
+  // Another thread could have attempted to create the keyset at the same time.
+  if (errval != NTE_EXISTS)
+    return errval;
+
+  if (::CryptAcquireContextW(&handle, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return 0;
+
+  return ::GetLastError();
+}
+
+#endif
 
 void system_crypt_random(void* buf, std::size_t len, boost::system::error_code* ec)
 {
@@ -75,24 +103,11 @@ void system_crypt_random(void* buf, std::size_t len, boost::system::error_code* 
 # else // BOOST_WINDOWS_API
 
   HCRYPTPROV handle;
-  int errval = 0;
-
-  if (!::CryptAcquireContextW(&handle, 0, 0, PROV_RSA_FULL, 0))
-  {
-    errval = ::GetLastError();
-    if (errval == NTE_BAD_KEYSET)
-    {
-      if (!::CryptAcquireContextW(&handle, 0, 0, PROV_RSA_FULL, CRYPT_NEWKEYSET))
-      {
-        errval = ::GetLastError();
-      }
-      else errval = 0;
-    }
-  }
+  int errval = acquire_crypt_handle(handle);
 
   if (!errval)
   {
-    BOOL gen_ok = ::CryptGenRandom(handle, len, static_cast<unsigned char*>(buf));
+    BOOL gen_ok = ::CryptGenRandom(handle, static_cast<DWORD>(len), static_cast<unsigned char*>(buf));
     if (!gen_ok)
       errval = ::GetLastError();
     ::CryptReleaseContext(handle, 0);
@@ -111,17 +126,31 @@ namespace boost { namespace filesystem { namespace detail {
 BOOST_FILESYSTEM_DECL
 path unique_path(const path& model, system::error_code* ec)
 {
-  std::wstring s (model.wstring());  // std::string ng for MBCS encoded POSIX
+  // This function used wstring for fear of misidentifying
+  // a part of a multibyte character as a percent sign.
+  // However, double byte encodings only have 80-FF as lead
+  // bytes and 40-7F as trailing bytes, whereas % is 25.
+  // So, use string on POSIX and avoid conversions.
+
+  path::string_type s( model.native() );
+
+#ifdef BOOST_WINDOWS_API
   const wchar_t hex[] = L"0123456789abcdef";
+  const wchar_t percent = L'%';
+#else
+  const char hex[] = "0123456789abcdef";
+  const char percent = '%';
+#endif
+
   char ran[] = "123456789abcdef";  // init to avoid clang static analyzer message
                                    // see ticket #8954
   assert(sizeof(ran) == 16);
   const int max_nibbles = 2 * sizeof(ran);   // 4-bits per nibble
 
   int nibbles_used = max_nibbles;
-  for(std::wstring::size_type i=0; i < s.size(); ++i)
+  for(path::string_type::size_type i=0; i < s.size(); ++i)
   {
-    if (s[i] == L'%')                        // digit request
+    if (s[i] == percent)                     // digit request
     {
       if (nibbles_used == max_nibbles)
       {
